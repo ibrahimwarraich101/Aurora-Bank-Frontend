@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { User, Home, Loader2, AlertCircle } from "lucide-react";
+import { User, Loader2, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { fetchCustomers } from "../services/api";
 import { AxiosError } from "axios";
@@ -58,13 +58,7 @@ const ViewCustomers: React.FC = () => {
               <p className="text-gray-600 mt-1">View all registered customers in the system</p>
             </div>
           </div>
-          <button
-            onClick={() => navigate("/")}
-            className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-200 rounded-xl hover:shadow-lg transition-all duration-200"
-          >
-            <Home size={20} />
-            <span className="font-medium">Home</span>
-          </button>
+          
         </div>
 
         {/* Loading State */}

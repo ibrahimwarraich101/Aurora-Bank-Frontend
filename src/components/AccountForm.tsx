@@ -1,10 +1,9 @@
 import React, { useState } from "react";
-import { CreditCard, DollarSign, User, ArrowLeft, CheckCircle } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { CreditCard, DollarSign, User, CheckCircle } from "lucide-react";
 import { addAccount } from "../services/api"; 
 
 const AccountForm: React.FC = () => {
-  const navigate = useNavigate();
+  
   const [customerID, setCustomerID] = useState<string>("");
   const [type, setType] = useState<string>("Savings");
   const [balance, setBalance] = useState<string>("");
@@ -83,16 +82,9 @@ const AccountForm: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Back Button */}
-        <button
-          onClick={() => navigate("/")}
-          className="mb-6 flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-        >
-          <ArrowLeft size={20} />
-          <span>Back to Dashboard</span>
-        </button>
+<div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-8">
+          <div className="w-full max-w-md">
+       
 
         {/* Header */}
         <div className="text-center mb-8">

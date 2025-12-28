@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FileText, Home, Loader2, AlertCircle, ArrowUpCircle, ArrowDownCircle, ArrowRightLeft } from "lucide-react";
+import { FileText, Loader2, AlertCircle, ArrowUpCircle, ArrowDownCircle, ArrowRightLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { fetchTransactions } from "../services/api";
 import { AxiosError } from "axios";
@@ -86,13 +86,7 @@ const ViewTransactions: React.FC = () => {
               <p className="text-gray-600 mt-1">View all transaction records</p>
             </div>
           </div>
-          <button
-            onClick={() => navigate("/")}
-            className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-200 rounded-xl hover:shadow-lg transition-all duration-200"
-          >
-            <Home size={20} />
-            <span className="font-medium">Home</span>
-          </button>
+          
         </div>
 
         {/* Loading State */}

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { UserPlus, User, CreditCard, Phone, ArrowLeft } from "lucide-react";
+import { UserPlus, User, CreditCard, Phone} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { addCustomer } from "../services/api";
 
@@ -105,16 +105,9 @@ const CustomerForm: React.FC = () => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 flex justify-center p-4 pt-16 min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 flex items-center justify-center p-8">
       <div className="w-full max-w-md">
-        {/* Back Button */}
-        <button
-          onClick={() => navigate("/")}
-          className="mb-6 flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-        >
-          <ArrowLeft size={20} />
-          <span>Back to Dashboard</span>
-        </button>
+        
 
         {/* Header */}
         <div className="text-center mb-8">

@@ -1,11 +1,9 @@
 import React, { useState } from "react";
-import { ArrowDownCircle, ArrowUpCircle, ArrowRightLeft, DollarSign, Lock, Home } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { ArrowDownCircle, ArrowUpCircle, ArrowRightLeft, DollarSign, Lock } from "lucide-react";
 import { deposit, withdraw, transfer } from "../services/api";
 import { AxiosError } from "axios";
 
 const TransactionForm: React.FC = () => {
-  const navigate = useNavigate();
   const [fromAccount, setFromAccount] = useState<string>("");
   const [toAccount, setToAccount] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
@@ -106,17 +104,10 @@ const TransactionForm: React.FC = () => {
   const needsToAccount = type === "Deposit" || type === "Transfer";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 flex items-center justify-center p-4">
+    // Find and replace the outer div`
+  <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-8">
       <div className="w-full max-w-md">
-        {/* Back to Home Button */}
-        <button
-          onClick={() => navigate("/")}
-          className="mb-4 flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl hover:shadow-md transition-all duration-200"
-        >
-          <Home size={18} />
-          <span className="font-medium text-sm">Back to Home</span>
-        </button>
-
+      
         {/* Header with dynamic icon */}
         <div className="text-center mb-8">
           <div className={`inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br ${config.gradient} rounded-2xl mb-4 shadow-lg transform transition-all duration-300`}>

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Shield, Home, Loader2, AlertCircle, Filter } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Shield, Loader2, AlertCircle, Filter } from "lucide-react";
 import { fetchAuditLogs, fetchAuditLogsByTable } from "../services/api";
 import { AxiosError } from "axios";
 
@@ -15,7 +14,6 @@ interface AuditLog {
 }
 
 const AuditLogs: React.FC = () => {
-  const navigate = useNavigate();
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -90,13 +88,7 @@ const AuditLogs: React.FC = () => {
               <p className="text-gray-600 mt-1">Complete system operation history and TCL tracking</p>
             </div>
           </div>
-          <button
-            onClick={() => navigate("/")}
-            className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-200 rounded-xl hover:shadow-lg transition-all duration-200"
-          >
-            <Home size={20} />
-            <span className="font-medium">Home</span>
-          </button>
+         
         </div>
 
         {/* Filter Section */}

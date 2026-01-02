@@ -1,3 +1,5 @@
+import axios from "axios";
+
 const API_URL = "http://localhost:5000";
 
 export interface Customer {
@@ -19,107 +21,148 @@ export interface Transaction {
   Type: "Deposit" | "Withdrawal" | "Transfer";
 }
 
-// ✅ Fetch all customers
+export interface AuditLog {
+  LogID: number;
+  Operation: string;
+  TableAffected: string;
+  RecordID: number | null;
+  User: string;
+  Details: string;
+  UserAction: string;
+  Status: string;
+  DateTime: string;
+}
+
+// ================== CUSTOMER APIs ==================
+
 export const fetchCustomers = async () => {
-  const res = await fetch(`${API_URL}/customers`);
-  if (!res.ok) throw new Error("Failed to fetch customers");
-  return res.json();
+  try {
+    const response = await axios.get(`${API_URL}/customers`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching customers:", error);
+    throw error;
+  }
 };
 
-// ✅ Add new customer
 export const addCustomer = async (customer: Customer) => {
-  const res = await fetch(`${API_URL}/customers`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(customer)
-  });
-  if (!res.ok) {
-    const errorData = await res.json();
-    throw new Error(errorData.error || "Failed to add customer");
+  try {
+    const response = await axios.post(`${API_URL}/customers`, customer);
+    return response.data;
+  } catch (error) {
+    console.error("Error adding customer:", error);
+    throw error;
   }
-  return res.json();
 };
 
-// ✅ Fetch all accounts
+// ================== ACCOUNT APIs ==================
+
 export const fetchAccounts = async () => {
-  const res = await fetch(`${API_URL}/accounts`);
-  if (!res.ok) throw new Error("Failed to fetch accounts");
-  return res.json();
+  try {
+    const response = await axios.get(`${API_URL}/accounts`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching accounts:", error);
+    throw error;
+  }
 };
 
-// ✅ Create new account
 export const addAccount = async (account: Account) => {
-  const res = await fetch(`${API_URL}/accounts`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(account)
-  });
-  if (!res.ok) {
-    const errorData = await res.json();
-    throw new Error(errorData.error || "Failed to create account");
+  try {
+    const response = await axios.post(`${API_URL}/accounts`, account);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating account:", error);
+    throw error;
   }
-  return res.json();
 };
 
-// ✅ Deposit money
+// ================== TRANSACTION APIs ==================
+
+/**
+ * Deposit money into an account
+ * @param AccountNo - Account number to deposit into
+ * @param Amount - Amount to deposit
+ */
 export const deposit = async (AccountNo: string, Amount: number) => {
-  const res = await fetch(`${API_URL}/accounts/deposit`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ AccountNo, Amount })
-  });
-  if (!res.ok) {
-    const errorData = await res.json();
-    throw new Error(errorData.error || "Deposit failed");
+  try {
+    const response = await axios.post(`${API_URL}/accounts/deposit`, {
+      AccountNo,
+      Amount
+    });
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.error || "Deposit failed");
+    }
+    throw new Error("Network error. Please check if backend is running.");
   }
-  return res.json();
 };
 
-// ✅ Withdraw money
+/**
+ * Withdraw money from an account
+ * @param AccountNo - Account number to withdraw from
+ * @param Amount - Amount to withdraw
+ */
 export const withdraw = async (AccountNo: string, Amount: number) => {
-  const res = await fetch(`${API_URL}/accounts/withdraw`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ AccountNo, Amount })
-  });
-  if (!res.ok) {
-    const errorData = await res.json();
-    throw new Error(errorData.error || "Withdrawal failed");
+  try {
+    const response = await axios.post(`${API_URL}/accounts/withdraw`, {
+      AccountNo,
+      Amount
+    });
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.error || "Withdrawal failed");
+    }
+    throw new Error("Network error. Please check if backend is running.");
   }
-  return res.json();
 };
 
-// ✅ Transfer money
+/**
+ * Transfer money between two accounts
+ * @param transaction - Transaction details with FromAccount, ToAccount, Amount
+ */
 export const transfer = async (transaction: Transaction) => {
-  const res = await fetch(`${API_URL}/transactions/transfer`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(transaction)
-  });
-  if (!res.ok) {
-    const errorData = await res.json();
-    throw new Error(errorData.error || "Transfer failed");
+  try {
+    const response = await axios.post(`${API_URL}/transactions/transfer`, transaction);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.error || "Transfer failed");
+    }
+    throw new Error("Network error. Please check if backend is running.");
   }
-  return res.json();
 };
 
-// ✅ NEW: Fetch all transactions
 export const fetchTransactions = async () => {
-  const res = await fetch(`${API_URL}/transactions`);
-  if (!res.ok) throw new Error("Failed to fetch transactions");
-  return res.json();
+  try {
+    const response = await axios.get(`${API_URL}/transactions`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching transactions:", error);
+    throw error;
+  }
 };
 
-// ✅ NEW: Fetch all audit logs
+// ================== AUDIT LOG APIs ==================
+
 export const fetchAuditLogs = async () => {
-  const res = await fetch(`${API_URL}/auditlogs`);
-  if (!res.ok) throw new Error("Failed to fetch audit logs");
-  return res.json();
+  try {
+    const response = await axios.get(`${API_URL}/auditlogs`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching audit logs:", error);
+    throw error;
+  }
 };
 
-// ✅ NEW: Fetch audit logs by table
 export const fetchAuditLogsByTable = async (tableName: string) => {
-  const res = await fetch(`${API_URL}/auditlogs/table/${tableName}`);
-  if (!res.ok) throw new Error("Failed to fetch audit logs");
-  return res.json();
+  try {
+    const response = await axios.get(`${API_URL}/auditlogs/table/${tableName}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching audit logs by table:", error);
+    throw error;
+  }
 };

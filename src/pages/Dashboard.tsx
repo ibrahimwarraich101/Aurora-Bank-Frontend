@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Users, Wallet, TrendingUp, Activity } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 interface Transaction {
@@ -41,6 +42,7 @@ const StatCard = ({ title, value, icon: Icon, color }: StatCardProps) => (
 );
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats>({
     totalCustomers: 0,
     totalAccounts: 0,
@@ -82,7 +84,7 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-purple-600 mx-auto mb-4"></div>
           <p className="text-gray-600 font-medium">Loading dashboard...</p>
@@ -115,7 +117,7 @@ const Dashboard = () => {
         />
         <StatCard
           title="Total Balance"
-          value={`$${stats.totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+          value={`${stats.totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
           icon={TrendingUp}
           color="from-purple-500 to-purple-600"
         />
@@ -125,7 +127,10 @@ const Dashboard = () => {
       <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-800">Recent Transactions</h2>
-          <button className="text-purple-600 hover:text-purple-700 font-medium text-sm">
+          <button 
+            onClick={() => navigate("/view-transactions")}
+            className="text-purple-600 hover:text-purple-700 font-medium text-sm"
+          >
             View All →
           </button>
         </div>

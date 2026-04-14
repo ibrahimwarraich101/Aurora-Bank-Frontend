@@ -93,8 +93,8 @@ export default function Login() {
 
         {/* Floating Glass Element */}
         <div className="relative z-10 p-12 max-w-xl text-white">
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-3xl inline-flex mb-8 shadow-2xl">
-             <Shield size={48} className="text-indigo-200" />
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 p-2 rounded-3xl inline-flex mb-8 shadow-2xl">
+             <img src="/aurora.png" alt="Aurora Logo" className="w-16 h-16 object-contain" />
           </div>
           <h1 className="text-5xl lg:text-6xl font-extrabold tracking-tight mb-6 leading-tight">
             Banking built for the <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">future.</span>
@@ -127,8 +127,8 @@ export default function Login() {
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
               {/* Header */}
               <div className="mb-8">
-                <div className="lg:hidden bg-indigo-50 p-3 rounded-2xl inline-flex mb-6">
-                   <Shield size={32} className="text-indigo-600" />
+                <div className="lg:hidden bg-indigo-50 p-2 rounded-2xl inline-flex mb-6">
+                   <img src="/aurora.png" alt="Aurora Logo" className="w-12 h-12 object-contain" />
                 </div>
                 <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h2>
                 <p className="text-gray-500 font-medium">Enter your username or email to proceed.</p>

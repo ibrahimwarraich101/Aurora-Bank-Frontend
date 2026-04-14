@@ -10,30 +10,32 @@ const TransactionForm: React.FC = () => {
   const [type, setType] = useState<"Deposit" | "Withdrawal" | "Transfer">("Deposit");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [errors, setErrors] = useState<{ amount?: string; fromAccount?: string; toAccount?: string }>({});
 
   const handleSubmit = async () => {
-    setErrorMessage("");
-    
+    setErrors({});
+    const newErrors: { amount?: string; fromAccount?: string; toAccount?: string } = {};
+
     if (!amount || parseFloat(amount) <= 0) {
-      setErrorMessage("Please enter a valid amount");
-      return;
+      newErrors.amount = "Please enter a valid amount";
     }
     
     if (type === "Deposit" && !toAccount) {
-      setErrorMessage("Please enter the account number for deposit");
-      return;
+      newErrors.toAccount = "Destination account is required";
     }
     if (type === "Withdrawal" && !fromAccount) {
-      setErrorMessage("Please enter the account number for withdrawal");
-      return;
+      newErrors.fromAccount = "Source account is required";
     }
-    if (type === "Transfer" && (!fromAccount || !toAccount)) {
-      setErrorMessage("Please enter both sender and receiver account numbers");
-      return;
+    if (type === "Transfer") {
+      if (!fromAccount) newErrors.fromAccount = "Source account is required";
+      if (!toAccount) newErrors.toAccount = "Destination account is required";
+      if (fromAccount && toAccount && fromAccount === toAccount) {
+        newErrors.toAccount = "Cannot transfer to the same account";
+      }
     }
-    if (type === "Transfer" && fromAccount === toAccount) {
-      setErrorMessage("Cannot transfer to the same account");
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
     
@@ -59,9 +61,11 @@ const TransactionForm: React.FC = () => {
       setAmount(""); 
       
       setTimeout(() => setShowSuccess(false), 3000);
-    } catch (err: unknown) {
-      const error = err as AxiosError;
-      setErrorMessage(error.message || "Transaction failed. Please try again.");
+    } catch (err: any) {
+      const msg = err.response?.data?.error || err.message || "Transaction failed";
+      if (msg.toLowerCase().includes("balance")) setErrors({ amount: msg });
+      else if (msg.toLowerCase().includes("account")) setErrors({ toAccount: msg });
+      else setErrors({ amount: msg });
     } finally {
       setIsSubmitting(false);
     }
@@ -104,8 +108,7 @@ const TransactionForm: React.FC = () => {
   const needsToAccount = type === "Deposit" || type === "Transfer";
 
   return (
-    // Find and replace the outer div`
-<div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 lg:p-12">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 lg:p-12">
       <div className="w-full max-w-6xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col lg:flex-row relative">
       
         {/* Left Side Aesthetic Decor */}
@@ -116,8 +119,8 @@ const TransactionForm: React.FC = () => {
           </div>
           
           <div className="relative z-10 transition-all duration-500">
-            <div className={`inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br ${config.gradient} shadow-[0_0_20px_rgba(255,255,255,0.2)] rounded-2xl mb-8 border border-white/20 shadow-xl transform hover:scale-105 transition-transform`}>
-              {config.icon}
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl mb-8 border border-white/20 shadow-xl">
+              <img src="/aurora.png" alt="Aurora Bank" className="w-10 h-10 object-contain brightness-0 invert" />
             </div>
             <h2 className="text-4xl lg:text-5xl font-bold mb-4 leading-tight">
               Execute <br/>Transaction
@@ -151,15 +154,6 @@ const TransactionForm: React.FC = () => {
               <div className={`mb-6 p-4 ${config.bgLight} border-2 ${config.borderColor} rounded-2xl animate-in fade-in slide-in-from-top-4 duration-500 shadow-sm`}>
                 <p className={`${config.textColor} text-center font-bold text-lg flex items-center justify-center gap-2`}>
                   ✓ Transaction Authorized
-                </p>
-              </div>
-            )}
-
-            {/* Error Message */}
-            {errorMessage && (
-              <div className="mb-6 p-4 bg-red-50/80 border-2 border-red-200 rounded-2xl animate-in fade-in slide-in-from-top-4 duration-500 shadow-sm">
-                <p className="text-red-700 text-center font-bold flex items-center justify-center gap-2">
-                  ✗ {errorMessage}
                 </p>
               </div>
             )}
@@ -233,10 +227,11 @@ const TransactionForm: React.FC = () => {
                     value={fromAccount}
                     onChange={e => {
                       setFromAccount(e.target.value);
-                      setErrorMessage("");
+                      setErrors(p => ({ ...p, fromAccount: undefined }));
                     }}
-                    className={`w-full px-5 py-3.5 border-2 border-gray-200 rounded-2xl bg-gray-50/50 hover:bg-gray-50 focus:bg-white ${config.focusRing} focus:border-transparent focus:ring-4 focus:ring-opacity-20 transition-all font-medium text-gray-900 outline-none`}
+                    className={`w-full px-5 py-3.5 border-2 ${errors.fromAccount ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-opacity-20'} rounded-2xl bg-gray-50/50 hover:bg-gray-50 focus:bg-white ${config.focusRing} focus:border-transparent focus:ring-4 transition-all font-medium text-gray-900 outline-none`}
                   />
+                  {errors.fromAccount && <p className="mt-1 text-xs text-red-500 font-semibold">* {errors.fromAccount}</p>}
                 </div>
               )}
 
@@ -253,10 +248,11 @@ const TransactionForm: React.FC = () => {
                     value={toAccount}
                     onChange={e => {
                       setToAccount(e.target.value);
-                      setErrorMessage("");
+                      setErrors(p => ({ ...p, toAccount: undefined }));
                     }}
-                    className={`w-full px-5 py-3.5 border-2 border-gray-200 rounded-2xl bg-gray-50/50 hover:bg-gray-50 focus:bg-white ${config.focusRing} focus:border-transparent focus:ring-4 focus:ring-opacity-20 transition-all font-medium text-gray-900 outline-none`}
+                    className={`w-full px-5 py-3.5 border-2 ${errors.toAccount ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-opacity-20'} rounded-2xl bg-gray-50/50 hover:bg-gray-50 focus:bg-white ${config.focusRing} focus:border-transparent focus:ring-4 transition-all font-medium text-gray-900 outline-none`}
                   />
+                  {errors.toAccount && <p className="mt-1 text-xs text-red-500 font-semibold">* {errors.toAccount}</p>}
                 </div>
               )}
 
@@ -278,10 +274,11 @@ const TransactionForm: React.FC = () => {
                     value={amount}
                     onChange={e => {
                       setAmount(e.target.value);
-                      setErrorMessage("");
+                      setErrors(p => ({ ...p, amount: undefined }));
                     }}
-                    className={`w-full pl-12 pr-4 py-3.5 border-2 border-gray-200 rounded-2xl bg-gray-50/50 hover:bg-gray-50 focus:bg-white ${config.focusRing} focus:border-transparent focus:ring-4 focus:ring-opacity-20 transition-all text-xl font-bold text-gray-900 outline-none tracking-wider`}
+                    className={`w-full pl-12 pr-4 py-3.5 border-2 ${errors.amount ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-opacity-20'} rounded-2xl bg-gray-50/50 hover:bg-gray-50 focus:bg-white ${config.focusRing} focus:border-transparent focus:ring-4 transition-all text-xl font-bold text-gray-900 outline-none tracking-wider`}
                   />
+                  {errors.amount && <p className="mt-1 text-xs text-red-500 font-semibold">* {errors.amount}</p>}
                 </div>
               </div>
 

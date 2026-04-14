@@ -72,8 +72,8 @@ const AdminDashboard = () => {
       <div className="mb-8 relative rounded-2xl bg-gradient-to-tr from-amber-700 via-orange-800 to-amber-900 p-6 overflow-hidden shadow-lg border border-amber-800/50">
         <div className="absolute top-0 right-0 w-64 h-64 bg-orange-400 rounded-full blur-[80px] opacity-20 pointer-events-none" />
         <div className="relative z-10 flex items-center gap-4 text-white">
-          <div className="flex-shrink-0 inline-flex items-center justify-center w-12 h-12 bg-white/10 rounded-xl border border-white/20">
-            <Activity className="w-6 h-6 text-amber-200" />
+          <div className="flex-shrink-0 inline-flex items-center justify-center w-12 h-12 bg-white/10 rounded-xl border border-white/20 overflow-hidden">
+            <img src="/aurora.png" alt="Aurora Bank" className="w-8 h-8 object-contain brightness-0 invert" />
           </div>
           <div>
             <h1 className="text-2xl font-bold">Admin Dashboard</h1>

@@ -96,9 +96,9 @@ const ViewTransactions: React.FC = () => {
            
            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-center gap-4 text-white">
-                 <div className="flex-shrink-0 inline-flex items-center justify-center w-12 h-12 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 shadow-inner">
-                   <ArrowRightLeft className="w-6 h-6 text-pink-200" />
-                 </div>
+                  <div className="flex-shrink-0 inline-flex items-center justify-center w-12 h-12 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 shadow-inner overflow-hidden">
+                    <img src="/aurora.png" alt="Aurora Bank" className="w-8 h-8 object-contain brightness-0 invert" />
+                  </div>
                  <div>
                    <h1 className="text-2xl font-bold tracking-tight drop-shadow-md">Global Ledger</h1>
                    <p className="text-pink-100/80 text-sm mt-0.5">

@@ -21,7 +21,8 @@ const EmployeeManagement = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState<ModalState>({ type: null });
-  const [form, setForm] = useState({ name: "", email: "", password: "", phone: "" });
+  const [form, setForm] = useState({ name: "", username: "", email: "", password: "", phone: "" });
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [showPwd, setShowPwd] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,34 +39,61 @@ const EmployeeManagement = () => {
   useEffect(() => { load(); }, []);
 
   const openCreate = () => {
-    setForm({ name: "", email: "", password: "", phone: "" });
+    setForm({ name: "", username: "", email: "", password: "", phone: "" });
     setError(null);
+    setFormErrors({});
     setModal({ type: "create" });
   };
 
   const openEdit = (emp: Employee) => {
-    setForm({ name: emp.name, email: emp.email, password: "", phone: emp.phone || "" });
+    setForm({ name: emp.name, username: "", email: emp.email, password: "", phone: emp.phone || "" });
     setError(null);
+    setFormErrors({});
     setModal({ type: "edit", employee: emp });
   };
 
   const handleSave = async () => {
     setSaving(true);
     setError(null);
+    setFormErrors({});
+    
+    // Client-side validation
+    const errors: Record<string, string> = {};
+    if (!form.name.trim()) errors.name = "Full Name is required";
+    if (!form.email.trim()) errors.email = "Email is required";
+    if (modal.type === "create") {
+      if (!form.username.trim()) errors.username = "Username is required";
+      if (!form.password.trim()) errors.password = "Password is required";
+      else if (form.password.length < 8) errors.password = "Minimum 8 characters required";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      setSaving(false);
+      return;
+    }
+
     try {
       if (modal.type === "create") {
-        if (!form.name || !form.email || !form.password) {
-          setError("Name, email, and password are required");
-          return;
-        }
-        await createEmployee({ name: form.name, email: form.email, password: form.password, phone: form.phone });
+        await createEmployee({ 
+          name: form.name, 
+          username: form.username,
+          email: form.email, 
+          password: form.password, 
+          phone: form.phone 
+        });
       } else if (modal.type === "edit" && modal.employee) {
         await updateEmployee(modal.employee.id, { name: form.name, email: form.email, phone: form.phone });
       }
       setModal({ type: null });
       load();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save");
+    } catch (err: any) {
+      const msg = err.response?.data?.error || err.message || "Failed to save";
+      setError(msg);
+      
+      // Try to map specific errors back to fields if we can
+      if (msg.toLowerCase().includes("email")) setFormErrors(p => ({ ...p, email: msg }));
+      if (msg.toLowerCase().includes("username")) setFormErrors(p => ({ ...p, username: msg }));
     } finally {
       setSaving(false);
     }
@@ -90,8 +118,8 @@ const EmployeeManagement = () => {
         <div className="absolute top-0 right-0 w-64 h-64 bg-purple-400 rounded-full blur-[80px] opacity-20 pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4 text-white">
-            <div className="flex-shrink-0 inline-flex items-center justify-center w-12 h-12 bg-white/10 rounded-xl border border-white/20">
-              <UserCheck className="w-6 h-6 text-violet-200" />
+            <div className="flex-shrink-0 inline-flex items-center justify-center w-12 h-12 bg-white/10 rounded-xl border border-white/20 overflow-hidden">
+              <img src="/aurora.png" alt="Aurora Bank" className="w-8 h-8 object-contain brightness-0 invert" />
             </div>
             <div>
               <h1 className="text-2xl font-bold">Employee Management</h1>
@@ -176,24 +204,58 @@ const EmployeeManagement = () => {
               <h3 className="text-lg font-bold text-gray-900">{modal.type === "create" ? "Create Employee" : "Edit Employee"}</h3>
               <button onClick={() => setModal({ type: null })} className="p-2 hover:bg-gray-100 rounded-lg transition-colors"><X size={18} /></button>
             </div>
-            <div className="p-6 space-y-4">
-              {error && <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100">{error}</div>}
-              {[
-                { label: "Full Name", key: "name", type: "text", placeholder: "John Doe" },
-                { label: "Email Address", key: "email", type: "email", placeholder: "john@example.com" },
-                { label: "Phone (optional)", key: "phone", type: "tel", placeholder: "+92 300 0000000" },
-              ].map(f => (
-                <div key={f.key}>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">{f.label}</label>
+            <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+              {error && <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100 mb-2">{error}</div>}
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Full Name</label>
+                <input
+                  type="text"
+                  value={form.name}
+                  onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
+                  placeholder="John Doe"
+                  className={`w-full px-3 py-2.5 border ${formErrors.name ? 'border-red-400 focus:ring-red-500' : 'border-gray-200 focus:ring-indigo-500'} rounded-xl text-sm focus:ring-2 focus:border-indigo-500 outline-none transition-all`}
+                />
+                {formErrors.name && <p className="mt-1 text-xs text-red-500 font-medium">{formErrors.name}</p>}
+              </div>
+
+              {modal.type === "create" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Username</label>
                   <input
-                    type={f.type}
-                    value={form[f.key as keyof typeof form]}
-                    onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
-                    placeholder={f.placeholder}
-                    className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                    type="text"
+                    value={form.username}
+                    onChange={e => setForm(p => ({ ...p, username: e.target.value }))}
+                    placeholder="johndoe123"
+                    className={`w-full px-3 py-2.5 border ${formErrors.username ? 'border-red-400 focus:ring-red-500' : 'border-gray-200 focus:ring-indigo-500'} rounded-xl text-sm focus:ring-2 focus:border-indigo-500 outline-none transition-all`}
                   />
+                  {formErrors.username && <p className="mt-1 text-xs text-red-500 font-medium">{formErrors.username}</p>}
                 </div>
-              ))}
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Email Address</label>
+                <input
+                  type="email"
+                  value={form.email}
+                  onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
+                  placeholder="john@example.com"
+                  className={`w-full px-3 py-2.5 border ${formErrors.email ? 'border-red-400 focus:ring-red-500' : 'border-gray-200 focus:ring-indigo-500'} rounded-xl text-sm focus:ring-2 focus:border-indigo-500 outline-none transition-all`}
+                />
+                {formErrors.email && <p className="mt-1 text-xs text-red-500 font-medium">{formErrors.email}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone (optional)</label>
+                <input
+                  type="tel"
+                  value={form.phone}
+                  onChange={e => setForm(p => ({ ...p, phone: e.target.value }))}
+                  placeholder="+92 300 0000000"
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                />
+              </div>
+
               {modal.type === "create" && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
@@ -203,12 +265,13 @@ const EmployeeManagement = () => {
                       value={form.password}
                       onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
                       placeholder="Minimum 8 characters"
-                      className="w-full pl-3 pr-10 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                      className={`w-full pl-3 pr-10 py-2.5 border ${formErrors.password ? 'border-red-400 focus:ring-red-500' : 'border-gray-200 focus:ring-indigo-500'} rounded-xl text-sm focus:ring-2 focus:border-indigo-500 outline-none transition-all`}
                     />
                     <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
                       {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                   </div>
+                  {formErrors.password && <p className="mt-1 text-xs text-red-500 font-medium">{formErrors.password}</p>}
                 </div>
               )}
             </div>

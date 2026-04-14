@@ -141,7 +141,7 @@ export const fetchEmployees = async () => {
   return res.data;
 };
 
-export const createEmployee = async (data: { name: string; email: string; password: string; phone?: string }) => {
+export const createEmployee = async (data: { name: string; username: string; email: string; password: string; phone?: string }) => {
   const res = await api.post("/employees", data);
   return res.data;
 };

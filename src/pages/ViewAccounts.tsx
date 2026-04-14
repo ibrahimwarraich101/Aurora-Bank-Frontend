@@ -79,28 +79,34 @@ finally {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
-              <div className="bg-gradient-to-br from-emerald-500 to-teal-600 p-4 rounded-2xl shadow-lg">
-                <CreditCard className="w-8 h-8 text-white" />
+<div className="min-h-screen bg-slate-50 p-6 lg:p-10">
+      <div className="max-w-7xl mx-auto flex flex-col">
+        {/* Compact Aesthetic Header */}
+        <div className="mb-8 relative rounded-2xl bg-gradient-to-tr from-blue-900 via-indigo-900 to-purple-900 p-6 overflow-hidden shadow-lg border border-indigo-800/50">
+           <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500 rounded-full blur-[80px] opacity-20 pointer-events-none"></div>
+           <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500 rounded-full blur-[80px] opacity-20 pointer-events-none"></div>
+           
+           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex items-center gap-4 text-white">
+                 <div className="flex-shrink-0 inline-flex items-center justify-center w-12 h-12 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 shadow-inner">
+                   <CreditCard className="w-6 h-6 text-blue-200" />
+                 </div>
+                 <div>
+                   <h1 className="text-2xl font-bold tracking-tight drop-shadow-md">Accounts Ledger</h1>
+                   <p className="text-blue-100/80 text-sm mt-0.5">
+                      View active accounts and monitor standing balances.
+                   </p>
+                 </div>
               </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-800">All Accounts</h1>
-                <p className="text-gray-600">View all registered accounts in the system</p>
-              </div>
-            </div>
-            <button
-              onClick={fetchAccounts}
-              className="flex items-center gap-2 px-4 py-2 bg-white rounded-xl shadow-md hover:shadow-lg transition-all"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Refresh
-            </button>
-          </div>
+              <button
+                onClick={fetchAccounts}
+                className="flex items-center justify-center gap-2 px-4 py-2 text-sm bg-white/10 backdrop-blur-md rounded-lg hover:bg-white/20 transition-all text-white font-medium border border-white/10 shadow-sm"
+               >
+                 <RefreshCw className="w-4 h-4" />
+                 Query Ledger
+               </button>
+           </div>
+        </div>
 
           {/* Search Bar */}
           <div className="relative">
@@ -129,7 +135,7 @@ finally {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600 text-sm">Total Balance</p>
-                  <p className="text-3xl font-bold text-gray-800">${totalBalance.toFixed(2)}</p>
+                  <p className="text-3xl font-bold text-gray-800">Rs. {totalBalance.toFixed(2)}</p>
                 </div>
                 <DollarSign className="w-10 h-10 text-green-500" />
               </div>
@@ -139,15 +145,13 @@ finally {
                 <div>
                   <p className="text-gray-600 text-sm">Avg Balance</p>
                   <p className="text-3xl font-bold text-gray-800">
-                    ${filteredAccounts.length ? (totalBalance / filteredAccounts.length).toFixed(2) : "0.00"}
+                    Rs. {filteredAccounts.length ? (totalBalance / filteredAccounts.length).toFixed(2) : "0.00"}
                   </p>
                 </div>
                 <DollarSign className="w-10 h-10 text-blue-500" />
               </div>
             </div>
           </div>
-        </div>
-
         {/* Error Message */}
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
@@ -209,7 +213,7 @@ finally {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <span className="font-bold text-green-600">
-                          ${Number(account.Balance).toFixed(2)}
+                          Rs. {Number(account.Balance).toFixed(2)}
                         </span>
                       </td>
                       <td className="px-6 py-4">

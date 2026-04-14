@@ -1,3 +1,20 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer utilities {
+  .bg-slate-50 {
+    background-color: #f8fafc !important;
+    background-image: 
+      radial-gradient(at 100% 0%, hsla(253, 16%, 7%, 0.03) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsla(225, 39%, 30%, 0.03) 0px, transparent 50%),
+      linear-gradient(to right, #e2e8f0 1px, transparent 1px),
+      linear-gradient(to bottom, #e2e8f0 1px, transparent 1px) !important;
+    background-size: 
+      100% 100%, 
+      100% 100%, 
+      40px 40px, 
+      40px 40px !important;
+    background-attachment: fixed !important;
+  }
+}

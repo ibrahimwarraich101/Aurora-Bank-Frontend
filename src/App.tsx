@@ -1,9 +1,14 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, User, CreditCard, ArrowRightLeft, Users, Database, Shield, Menu, X } from "lucide-react";
+import {
+  Home, User, CreditCard, ArrowRightLeft, Users, Database,
+  Shield, Menu, X, LogOut, Settings, BarChart2, UserCheck,
+  FileText, Building2, Eye
+} from "lucide-react";
 
-// Import all pages
+// Employee pages
 import Dashboard from "./pages/Dashboard";
 import CustomerForm from "./components/CustomerForm";
 import AccountForm from "./components/AccountForm";
@@ -12,89 +17,205 @@ import ViewCustomers from "./pages/ViewCustomers";
 import ViewAccounts from "./pages/ViewAccounts";
 import ViewTransactions from "./pages/ViewTransactions";
 import AuditLogs from "./pages/AuditLogs";
+import ChangePassword from "./components/ChangePassword";
 
-// Sidebar component
+// Admin pages
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import EmployeeManagement from "./pages/admin/EmployeeManagement";
+import AdminAllCustomers from "./pages/admin/AdminAllCustomers";
+import AdminAllAccounts from "./pages/admin/AdminAllAccounts";
+import AdminAllTransactions from "./pages/admin/AdminAllTransactions";
+import Reports from "./pages/admin/Reports";
+import AdminAuditLogs from "./pages/admin/AdminAuditLogs";
+import SystemSettings from "./pages/admin/SystemSettings";
+import AdminSettings from "./pages/admin/AdminSettings";
+
+// Guest pages
+import GuestDashboard from "./pages/guest/GuestDashboard";
+
+import Login from "./pages/Login";
+
+// ─── Sidebar ──────────────────────────────────────────────────────────────────
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [open, setOpen] = useState(true);
+  const { user, logout, isAdmin, isGuest } = useAuth();
 
-  const menuItems = [
+  const adminMenu = [
+    { path: "/admin", label: "Dashboard", icon: Home },
+    { path: "/admin/employees", label: "Employees", icon: UserCheck },
+    { path: "/admin/customers", label: "All Customers", icon: Users },
+    { path: "/admin/accounts", label: "All Accounts", icon: Database },
+    { path: "/admin/transactions", label: "All Transactions", icon: ArrowRightLeft },
+    { path: "/admin/reports", label: "Reports", icon: BarChart2 },
+    { path: "/admin/audit-logs", label: "Audit Logs", icon: Shield },
+    { path: "/admin/system-settings", label: "System Settings", icon: Building2 },
+    { path: "/admin/settings", label: "My Settings", icon: Settings },
+  ];
+
+  const guestMenu = [
+    { path: "/guest", label: "Overview", icon: Eye },
+    { path: "/guest/customers", label: "Customers", icon: Users },
+    { path: "/guest/accounts", label: "Accounts", icon: Database },
+    { path: "/guest/transactions", label: "Transactions", icon: ArrowRightLeft },
+    { path: "/guest/audit-logs", label: "Audit Logs", icon: Shield },
+  ];
+
+  const employeeMenu = [
     { path: "/", label: "Dashboard", icon: Home },
     { path: "/customer", label: "Customer Form", icon: User },
     { path: "/account", label: "Account Form", icon: CreditCard },
     { path: "/transaction", label: "Transaction Form", icon: ArrowRightLeft },
     { path: "/view-customers", label: "View Customers", icon: Users },
     { path: "/view-accounts", label: "View Accounts", icon: Database },
-    { path: "/view-transactions", label: "Transaction History", icon: ArrowRightLeft },
+    { path: "/view-transactions", label: "Transaction History", icon: FileText },
     { path: "/audit-logs", label: "Audit Logs", icon: Shield },
+    { path: "/settings", label: "Settings", icon: Settings },
   ];
 
+  const menuItems = isAdmin() ? adminMenu : isGuest() ? guestMenu : employeeMenu;
+
+  const roleLabel = isAdmin() ? "Administrator" : isGuest() ? "Guest" : "Employee";
+  const roleBadgeClass = isAdmin()
+    ? "bg-amber-500/20 text-amber-300"
+    : isGuest()
+    ? "bg-slate-400/20 text-slate-300"
+    : "bg-indigo-500/20 text-indigo-300";
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
+  const isActive = (path: string) => {
+    if (path === "/admin" || path === "/" || path === "/guest") {
+      return location.pathname === path;
+    }
+    return location.pathname.startsWith(path);
+  };
+
   return (
-    <div className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-gradient-to-b from-indigo-600 via-purple-600 to-pink-600 text-white transition-all duration-300 flex flex-col shadow-2xl h-screen fixed left-0 top-0 z-50`}>
+    <div className={`${open ? "w-64" : "w-20"} bg-gradient-to-b from-slate-900 via-indigo-950 to-slate-900 text-white transition-all duration-300 flex flex-col shadow-2xl h-screen fixed left-0 top-0 z-50 border-r border-white/5`}>
       {/* Header */}
-      <div className="p-4 flex items-center justify-between border-b border-white/20">
-        {sidebarOpen && <h1 className="text-xl font-bold">Aurora Bank</h1>}
-        <button 
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="p-2 hover:bg-white/20 rounded-lg transition-all"
-        >
-          {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+      <div className="p-4 flex items-center justify-between border-b border-white/10">
+        {open && (
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <span className="text-xs font-bold">AB</span>
+            </div>
+            <span className="font-bold text-sm tracking-wide">Aurora Bank</span>
+          </div>
+        )}
+        <button onClick={() => setOpen(!open)} className="p-2 hover:bg-white/10 rounded-lg transition-all">
+          {open ? <X size={18} /> : <Menu size={18} />}
         </button>
       </div>
 
+      {/* Role Badge */}
+      {open && user && (
+        <div className="px-4 py-3 border-b border-white/10">
+          <p className="text-xs text-slate-400 mb-1">Signed in as</p>
+          <p className="text-sm font-semibold truncate">{user.name}</p>
+          <span className={`text-xs px-2 py-0.5 rounded-full font-medium mt-1 inline-block ${roleBadgeClass}`}>
+            {roleLabel}
+          </span>
+        </div>
+      )}
+
       {/* Menu */}
-      <nav className="flex-1 px-2 py-4 space-y-2 overflow-y-auto">
+      <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
         {menuItems.map((item) => {
           const Icon = item.icon;
-          const isActive = location.pathname === item.path;
+          const active = isActive(item.path);
           return (
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                isActive
-                  ? 'bg-white text-indigo-600 shadow-lg font-bold'
-                  : 'hover:bg-white/10 text-white'
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-sm ${
+                active
+                  ? "bg-white/15 text-white font-semibold shadow-inner border border-white/10"
+                  : "hover:bg-white/8 text-slate-300 hover:text-white"
               }`}
             >
-              <Icon size={20} />
-              {sidebarOpen && <span className="text-sm">{item.label}</span>}
+              <Icon size={18} className={active ? "text-indigo-300" : "text-slate-400"} />
+              {open && <span>{item.label}</span>}
             </button>
           );
         })}
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-white/20">
-        {sidebarOpen && (
-          <div className="text-xs text-white/80">
-            <p>© 2025 Aurora Bank</p>
-            <p>CBS Final Project</p>
-          </div>
+      <div className="p-4 border-t border-white/10">
+        <button
+          onClick={handleLogout}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 hover:bg-red-500/15 rounded-xl transition-all text-red-400 hover:text-red-300 text-sm ${!open && "justify-center"}`}
+        >
+          <LogOut size={18} />
+          {open && <span>Logout</span>}
+        </button>
+        {open && (
+          <p className="text-xs text-slate-600 mt-3 text-center">© Aurora Bank</p>
         )}
       </div>
     </div>
   );
 };
 
-// Layout component
-const Layout = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar />
-      <div className="flex-1 overflow-auto ml-64">
-        {children}
-      </div>
+// ─── Layout ───────────────────────────────────────────────────────────────────
+const Layout = () => (
+  <div className="flex h-screen overflow-hidden">
+    <Sidebar />
+    <div className="flex-1 overflow-auto ml-64">
+      <Outlet />
     </div>
-  );
+  </div>
+);
+
+// ─── Route Guards ─────────────────────────────────────────────────────────────
+const RequireAuth = ({ allowedRoles }: { allowedRoles: ("admin" | "employee" | "guest")[] }) => {
+  const { user, token } = useAuth();
+  if (!token || !user) return <Navigate to="/login" replace />;
+  if (!allowedRoles.includes(user.role)) {
+    if (user.role === "admin") return <Navigate to="/admin" replace />;
+    if (user.role === "guest") return <Navigate to="/guest" replace />;
+    return <Navigate to="/" replace />;
+  }
+  return <Layout />;
 };
 
+// ─── Employee Settings wrapper ────────────────────────────────────────────────
+const EmployeeSettingsPage = () => (
+  <div className="min-h-screen bg-slate-50 p-6 lg:p-10 flex flex-col">
+    <div className="max-w-4xl mx-auto w-full flex-1 flex flex-col">
+      <div className="mb-8 relative rounded-2xl bg-gradient-to-tr from-indigo-900 via-slate-800 to-indigo-950 p-6 overflow-hidden shadow-lg border border-indigo-800/50">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500 rounded-full blur-[80px] opacity-20 pointer-events-none" />
+        <div className="relative z-10 flex items-center gap-4 text-white">
+          <div className="flex-shrink-0 inline-flex items-center justify-center w-12 h-12 bg-white/10 rounded-xl border border-white/20">
+            <Settings className="w-6 h-6 text-indigo-200" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold">My Settings</h1>
+            <p className="text-indigo-100/80 text-sm mt-0.5">Manage your account security and preferences.</p>
+          </div>
+        </div>
+      </div>
+      <div className="flex-1 flex items-center justify-center -mt-20">
+        <ChangePassword />
+      </div>
+    </div>
+  </div>
+);
+
+// ─── App ──────────────────────────────────────────────────────────────────────
 function App() {
   return (
     <Router>
-      <Layout>
-        <Routes>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+
+        {/* Employee routes */}
+        <Route element={<RequireAuth allowedRoles={["employee"]} />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/customer" element={<CustomerForm />} />
           <Route path="/account" element={<AccountForm />} />
@@ -103,8 +224,34 @@ function App() {
           <Route path="/view-accounts" element={<ViewAccounts />} />
           <Route path="/view-transactions" element={<ViewTransactions />} />
           <Route path="/audit-logs" element={<AuditLogs />} />
-        </Routes>
-      </Layout>
+          <Route path="/settings" element={<EmployeeSettingsPage />} />
+        </Route>
+
+        {/* Admin routes */}
+        <Route element={<RequireAuth allowedRoles={["admin"]} />}>
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/employees" element={<EmployeeManagement />} />
+          <Route path="/admin/customers" element={<AdminAllCustomers />} />
+          <Route path="/admin/accounts" element={<AdminAllAccounts />} />
+          <Route path="/admin/transactions" element={<AdminAllTransactions />} />
+          <Route path="/admin/reports" element={<Reports />} />
+          <Route path="/admin/audit-logs" element={<AdminAuditLogs />} />
+          <Route path="/admin/system-settings" element={<SystemSettings />} />
+          <Route path="/admin/settings" element={<AdminSettings />} />
+        </Route>
+
+        {/* Guest routes (read-only, reuses admin view pages) */}
+        <Route element={<RequireAuth allowedRoles={["guest"]} />}>
+          <Route path="/guest" element={<GuestDashboard />} />
+          <Route path="/guest/customers" element={<AdminAllCustomers />} />
+          <Route path="/guest/accounts" element={<AdminAllAccounts />} />
+          <Route path="/guest/transactions" element={<AdminAllTransactions />} />
+          <Route path="/guest/audit-logs" element={<AdminAuditLogs />} />
+        </Route>
+
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
     </Router>
   );
 }

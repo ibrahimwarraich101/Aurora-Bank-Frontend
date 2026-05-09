@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Users, Trash2, AlertCircle, Search, RefreshCw } from "lucide-react";
 import api from "../services/api";
+import axios from "axios";
 
 interface Customer {
   CustomerID: number;

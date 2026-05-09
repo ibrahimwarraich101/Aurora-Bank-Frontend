@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { BarChart2, TrendingUp } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, LineChart, Line, ResponsiveContainer } from "recharts";
 import { fetchAdminReports } from "../../services/api";
 

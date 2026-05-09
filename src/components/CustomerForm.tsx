@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { UserPlus, User, CreditCard, Phone, CheckCircle } from "lucide-react";
+import { User, CreditCard, Phone, CheckCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { addCustomer } from "../services/api";
 

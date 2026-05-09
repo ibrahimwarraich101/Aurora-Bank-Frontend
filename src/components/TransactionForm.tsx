@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { ArrowDownCircle, ArrowUpCircle, ArrowRightLeft, DollarSign, Lock } from "lucide-react";
 import { deposit, withdraw, transfer } from "../services/api";
-import { AxiosError } from "axios";
 
 const TransactionForm: React.FC = () => {
   const [fromAccount, setFromAccount] = useState<string>("");
@@ -170,7 +169,7 @@ const TransactionForm: React.FC = () => {
                     type="button"
                     onClick={() => {
                       setType("Deposit");
-                      setErrorMessage("");
+                      setErrors({});
                     }}
                     className={`py-3 px-2 rounded-xl font-bold transition-all duration-300 transform ${
                       type === "Deposit"
@@ -185,7 +184,7 @@ const TransactionForm: React.FC = () => {
                     type="button"
                     onClick={() => {
                       setType("Withdrawal");
-                      setErrorMessage("");
+                      setErrors({});
                     }}
                     className={`py-3 px-2 rounded-xl font-bold transition-all duration-300 transform ${
                       type === "Withdrawal"
@@ -200,7 +199,7 @@ const TransactionForm: React.FC = () => {
                     type="button"
                     onClick={() => {
                       setType("Transfer");
-                      setErrorMessage("");
+                      setErrors({});
                     }}
                     className={`py-3 px-2 rounded-xl font-bold transition-all duration-300 transform ${
                       type === "Transfer"

@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import {
   Home, User, CreditCard, ArrowRightLeft, Users, Database,
   Shield, Menu, X, LogOut, Settings, BarChart2, UserCheck,
-  FileText, Building2, Eye
+  FileText, Building2
 } from "lucide-react";
 
 // Employee pages

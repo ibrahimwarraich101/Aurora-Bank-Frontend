@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Building2, Save } from "lucide-react";
+import { Save } from "lucide-react";
 import { fetchSystemSettings, updateSystemSettings } from "../../services/api";
 
 const SystemSettings = () => {

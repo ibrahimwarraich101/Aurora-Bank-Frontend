@@ -4,11 +4,15 @@ import { Eye, EyeOff, Mail, Lock, AlertCircle, CheckCircle2, ArrowLeft, Shield, 
 import { login, forgotPassword } from "../services/auth";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import { useRecaptcha } from "../hooks/useRecaptcha";
+
 
 export default function Login() {
   const navigate = useNavigate();
   const { login: authLogin } = useAuth();
+  const getRecaptchaToken = useRecaptcha();
   const [view, setView] = useState<"login" | "forgotPassword" | "guestSelection">("login");
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -24,7 +28,8 @@ export default function Login() {
     if (!email || !password) { setError("Please fill in all required fields"); return; }
     setLoading(true); setError(null);
     try {
-      const response = await login(email, password);
+      const recaptchaToken = await getRecaptchaToken("login");
+      const response = await login(email, password, recaptchaToken);
       authLogin(response.token, response.user);
       if (response.user.role === "admin") navigate("/admin");
       else if (response.user.role === "guest") navigate("/guest");
@@ -37,7 +42,8 @@ export default function Login() {
   const handleGuestLogin = async (role: 'admin' | 'employee') => {
     setLoading(true); setError(null);
     try {
-      const response = await api.post("/auth/guest", { role });
+      const recaptchaToken = await getRecaptchaToken("guest_login");
+      const response = await api.post("/auth/guest", { role, recaptchaToken });
       authLogin(response.data.token, response.data.user);
       if (response.data.user.role === "admin") navigate("/admin");
       else navigate("/");
@@ -50,7 +56,8 @@ export default function Login() {
     if (!resetEmail) { setError("Please enter your email address"); return; }
     setLoading(true); setError(null); setSuccessMsg(null);
     try {
-      await forgotPassword(resetEmail);
+      const recaptchaToken = await getRecaptchaToken("forgot_password");
+      await forgotPassword(resetEmail, recaptchaToken);
       setSuccessMsg("A password reset link has been sent to your email");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to process request");
@@ -393,6 +400,12 @@ export default function Login() {
           {/* Footer */}
           <p className="text-center text-xs text-indigo-400/30 mt-10">
             © 2026 Aurora Bank Group · All Rights Reserved
+          </p>
+          <p className="text-center text-xs text-indigo-400/20 mt-2">
+            Protected by reCAPTCHA ·{' '}
+            <a href="https://policies.google.com/privacy" target="_blank" rel="noreferrer" className="underline hover:text-indigo-400/40 transition-colors">Privacy</a>
+            {' '}·{' '}
+            <a href="https://policies.google.com/terms" target="_blank" rel="noreferrer" className="underline hover:text-indigo-400/40 transition-colors">Terms</a>
           </p>
         </div>
       </div>

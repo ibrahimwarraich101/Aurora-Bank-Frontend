@@ -1,13 +1,18 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import App from "./App";
 import { AuthProvider } from "./context/AuthContext";
 import "./index.css";
 
+const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY as string;
+
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
+    <GoogleReCaptchaProvider reCaptchaKey={siteKey}>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </GoogleReCaptchaProvider>
   </React.StrictMode>
 );

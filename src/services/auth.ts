@@ -1,8 +1,8 @@
 import api from "./api";
 
-export const login = async (email: string, password: string) => {
+export const login = async (email: string, password: string, recaptchaToken: string) => {
   try {
-    const response = await api.post("/auth/login", { email, password });
+    const response = await api.post("/auth/login", { email, password, recaptchaToken });
     return response.data;
   } catch (error: unknown) {
     if (error && typeof error === "object" && "response" in error) {
@@ -13,9 +13,9 @@ export const login = async (email: string, password: string) => {
   }
 };
 
-export const forgotPassword = async (email: string) => {
+export const forgotPassword = async (email: string, recaptchaToken: string) => {
   try {
-    const response = await api.post("/auth/forgot-password", { email });
+    const response = await api.post("/auth/forgot-password", { email, recaptchaToken });
     return response.data;
   } catch (error: unknown) {
     if (error && typeof error === "object" && "response" in error) {
@@ -26,9 +26,9 @@ export const forgotPassword = async (email: string) => {
   }
 };
 
-export const changePassword = async (currentPassword: string, newPassword: string) => {
+export const changePassword = async (currentPassword: string, newPassword: string, recaptchaToken: string) => {
   try {
-    const response = await api.post("/auth/change-password", { currentPassword, newPassword });
+    const response = await api.post("/auth/change-password", { currentPassword, newPassword, recaptchaToken });
     return response.data;
   } catch (error: unknown) {
     if (error && typeof error === "object" && "response" in error) {
@@ -39,9 +39,9 @@ export const changePassword = async (currentPassword: string, newPassword: strin
   }
 };
 
-export const updateProfile = async (data: { name?: string; email?: string }) => {
+export const updateProfile = async (data: { name?: string; email?: string }, recaptchaToken: string) => {
   try {
-    const response = await api.put("/auth/profile", data);
+    const response = await api.put("/auth/profile", { ...data, recaptchaToken });
     return response.data;
   } catch (error: unknown) {
     if (error && typeof error === "object" && "response" in error) {

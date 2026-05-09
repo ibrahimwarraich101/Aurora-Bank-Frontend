@@ -2,10 +2,14 @@ import { useState, useEffect } from "react";
 import { Settings, Lock, Eye, EyeOff, AlertCircle, CheckCircle2, ShieldCheck, User, Mail, Info } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { changePassword, updateProfile } from "../../services/auth";
+import { useRecaptcha } from "../../hooks/useRecaptcha";
+
 
 const AdminSettings = () => {
   const { user, login: authLogin, token } = useAuth();
+  const getRecaptchaToken = useRecaptcha();
   const [tab, setTab] = useState<"profile" | "password">("profile");
+
 
   // Profile form
   const [name, setName] = useState(user?.name || "");
@@ -44,7 +48,8 @@ const AdminSettings = () => {
     setProfileError(null);
     setProfileSuccess(null);
     try {
-      const res = await updateProfile({ name, email });
+      const recaptchaToken = await getRecaptchaToken("update_profile");
+      const res = await updateProfile({ name, email }, recaptchaToken);
       // Update localStorage
       if (token && res.user) {
         authLogin(token, res.user);
@@ -66,7 +71,8 @@ const AdminSettings = () => {
     setPwdError(null);
     setPwdSuccess(null);
     try {
-      await changePassword(currentPassword, newPassword);
+      const recaptchaToken = await getRecaptchaToken("change_password");
+      await changePassword(currentPassword, newPassword, recaptchaToken);
       setPwdSuccess("Password updated successfully!");
       setCurrentPassword(""); setNewPassword(""); setConfirmPassword("");
       setTimeout(() => setPwdSuccess(null), 3000);

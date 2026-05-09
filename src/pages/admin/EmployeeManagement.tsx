@@ -26,6 +26,7 @@ const EmployeeManagement = () => {
   const [showPwd, setShowPwd] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState<{show: boolean, message: string}>({ show: false, message: "" });
 
   const load = async () => {
     setLoading(true);
@@ -57,12 +58,10 @@ const EmployeeManagement = () => {
     setError(null);
     setFormErrors({});
     
-    // Client-side validation
     const errors: Record<string, string> = {};
     if (!form.name.trim()) errors.name = "Full Name is required";
     if (!form.email.trim()) errors.email = "Email is required";
     
-    // Phone validation: +92 123 4567890
     if (form.phone && !/^\+92\s\d{3}\s\d{7}$/.test(form.phone)) {
       errors.phone = "Format must be: +92 123 4567890";
     }
@@ -89,22 +88,19 @@ const EmployeeManagement = () => {
           password: form.password, 
           phone: form.phone 
         });
-        
-        // Correcting: res is already res.data from services/api.ts
-        if (res && res.success) {
-          alert(res.message || `Success! Welcome email sent to ${form.email}`);
-        }
+        setShowSuccessModal({ show: true, message: res?.message || `Employee created! A welcome email has been dispatched to ${form.email}.` });
       } else if (modal.type === "edit" && modal.employee) {
         await updateEmployee(modal.employee.id, { name: form.name, email: form.email, phone: form.phone });
+        setShowSuccessModal({ show: true, message: `${form.name}'s profile has been updated. A security notification email is on its way.` });
       }
       setModal({ type: null });
       load();
     } catch (err: any) {
       const msg = err.response?.data?.error || err.message || "Failed to save";
-      setError(msg);
+      const isActualEmailError = msg.toLowerCase().includes("email") && !msg.includes("sendProfileUpdateEmail");
       
-      // Try to map specific errors back to fields if we can
-      if (msg.toLowerCase().includes("email")) setFormErrors(p => ({ ...p, email: msg }));
+      setError(msg);
+      if (isActualEmailError) setFormErrors(p => ({ ...p, email: msg }));
       if (msg.toLowerCase().includes("username")) setFormErrors(p => ({ ...p, username: msg }));
     } finally {
       setSaving(false);
@@ -208,7 +204,7 @@ const EmployeeManagement = () => {
         )}
       </div>
 
-      {/* Modal */}
+      {/* Main Modal (Create/Edit) */}
       {modal.type && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
@@ -264,24 +260,13 @@ const EmployeeManagement = () => {
                   value={form.phone}
                   onChange={e => {
                     let val = e.target.value;
-                    
-                    // Force start with +92
                     if (!val.startsWith("+92 ")) {
                       val = "+92 " + val.replace(/^\+92\s?/, "");
                     }
-
-                    // Remove all non-digits except the leading +
                     const digits = val.slice(4).replace(/\D/g, "");
-                    
-                    // Format: +92 3XX XXXXXXX
                     let formatted = "+92 ";
-                    if (digits.length > 0) {
-                      formatted += digits.slice(0, 3);
-                    }
-                    if (digits.length > 3) {
-                      formatted += " " + digits.slice(3, 10);
-                    }
-                    
+                    if (digits.length > 0) formatted += digits.slice(0, 3);
+                    if (digits.length > 3) formatted += " " + digits.slice(3, 10);
                     setForm(p => ({ ...p, phone: formatted }));
                   }}
                   onFocus={() => {
@@ -316,6 +301,43 @@ const EmployeeManagement = () => {
               <button onClick={() => setModal({ type: null })} className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
               <button onClick={handleSave} disabled={saving} className="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-colors disabled:opacity-60">
                 {saving ? "Saving..." : (modal.type === "create" ? "Create Employee" : "Save Changes")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Modal — Aurora Bank Premium Theme */}
+      {showSuccessModal.show && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" style={{background: 'rgba(10,10,30,0.7)', backdropFilter: 'blur(12px)'}}>
+          <div className="relative w-full max-w-sm overflow-hidden rounded-3xl shadow-2xl" style={{background: 'linear-gradient(145deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%)', border: '1px solid rgba(129,140,248,0.3)'}}>
+            {/* Glow effect */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 rounded-full" style={{background: 'radial-gradient(circle, rgba(99,102,241,0.4) 0%, transparent 70%)', filter: 'blur(20px)', pointerEvents: 'none'}} />
+            
+            {/* Icon area */}
+            <div className="relative pt-10 pb-6 flex flex-col items-center">
+              <div className="w-24 h-24 rounded-full flex items-center justify-center" style={{background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', boxShadow: '0 0 40px rgba(99,102,241,0.6)'}}>
+                <UserCheck size={44} className="text-white" />
+              </div>
+              {/* Decorative rings */}
+              <div className="absolute top-8 left-1/2 -translate-x-1/2 w-28 h-28 rounded-full" style={{border: '1px solid rgba(129,140,248,0.3)'}} />
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 w-36 h-36 rounded-full" style={{border: '1px solid rgba(129,140,248,0.15)'}} />
+            </div>
+
+            {/* Content */}
+            <div className="relative px-8 pb-10 text-center">
+              <h3 className="text-2xl font-bold text-white mb-3" style={{letterSpacing: '-0.5px'}}>Action Successful</h3>
+              <p className="text-indigo-200/80 text-sm leading-relaxed">
+                {showSuccessModal.message}
+              </p>
+              <button
+                onClick={() => setShowSuccessModal({ show: false, message: "" })}
+                className="mt-8 w-full py-3.5 rounded-2xl font-bold text-white transition-all"
+                style={{background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', boxShadow: '0 8px 30px rgba(99,102,241,0.5)'}}
+                onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 8px 40px rgba(99,102,241,0.8)')}
+                onMouseLeave={e => (e.currentTarget.style.boxShadow = '0 8px 30px rgba(99,102,241,0.5)')}
+              >
+                Continue
               </button>
             </div>
           </div>

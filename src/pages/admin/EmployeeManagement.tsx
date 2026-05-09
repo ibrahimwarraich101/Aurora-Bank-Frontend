@@ -61,6 +61,12 @@ const EmployeeManagement = () => {
     const errors: Record<string, string> = {};
     if (!form.name.trim()) errors.name = "Full Name is required";
     if (!form.email.trim()) errors.email = "Email is required";
+    
+    // Phone validation: +92 123 4567890
+    if (form.phone && !/^\+92\s\d{3}\s\d{7}$/.test(form.phone)) {
+      errors.phone = "Format must be: +92 123 4567890";
+    }
+
     if (modal.type === "create") {
       if (!form.username.trim()) errors.username = "Username is required";
       if (!form.password.trim()) errors.password = "Password is required";
@@ -84,9 +90,9 @@ const EmployeeManagement = () => {
           phone: form.phone 
         });
         
-        // Show success popup as requested
-        if (res.data.success) {
-          alert(res.data.message || `Success! Welcome email sent to ${form.email}`);
+        // Correcting: res is already res.data from services/api.ts
+        if (res && res.success) {
+          alert(res.message || `Success! Welcome email sent to ${form.email}`);
         }
       } else if (modal.type === "edit" && modal.employee) {
         await updateEmployee(modal.employee.id, { name: form.name, email: form.email, phone: form.phone });
@@ -256,10 +262,35 @@ const EmployeeManagement = () => {
                 <input
                   type="tel"
                   value={form.phone}
-                  onChange={e => setForm(p => ({ ...p, phone: e.target.value }))}
-                  placeholder="+92 300 0000000"
-                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                  onChange={e => {
+                    let val = e.target.value;
+                    
+                    // Force start with +92
+                    if (!val.startsWith("+92 ")) {
+                      val = "+92 " + val.replace(/^\+92\s?/, "");
+                    }
+
+                    // Remove all non-digits except the leading +
+                    const digits = val.slice(4).replace(/\D/g, "");
+                    
+                    // Format: +92 3XX XXXXXXX
+                    let formatted = "+92 ";
+                    if (digits.length > 0) {
+                      formatted += digits.slice(0, 3);
+                    }
+                    if (digits.length > 3) {
+                      formatted += " " + digits.slice(3, 10);
+                    }
+                    
+                    setForm(p => ({ ...p, phone: formatted }));
+                  }}
+                  onFocus={e => {
+                    if (!form.phone) setForm(p => ({ ...p, phone: "+92 " }));
+                  }}
+                  placeholder="+92 300 1234567"
+                  className={`w-full px-3 py-2.5 border ${formErrors.phone ? 'border-red-400 focus:ring-red-500' : 'border-gray-200 focus:ring-indigo-500'} rounded-xl text-sm focus:ring-2 focus:border-indigo-500 outline-none transition-all`}
                 />
+                {formErrors.phone && <p className="mt-1 text-xs text-red-500 font-medium">{formErrors.phone}</p>}
               </div>
 
               {modal.type === "create" && (

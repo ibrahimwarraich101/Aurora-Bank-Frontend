@@ -401,12 +401,7 @@ export default function Login() {
           <p className="text-center text-xs text-indigo-400/30 mt-10">
             © 2026 Aurora Bank Group · All Rights Reserved
           </p>
-          <p className="text-center text-xs text-indigo-400/20 mt-2">
-            Protected by reCAPTCHA ·{' '}
-            <a href="https://policies.google.com/privacy" target="_blank" rel="noreferrer" className="underline hover:text-indigo-400/40 transition-colors">Privacy</a>
-            {' '}·{' '}
-            <a href="https://policies.google.com/terms" target="_blank" rel="noreferrer" className="underline hover:text-indigo-400/40 transition-colors">Terms</a>
-          </p>
+
         </div>
       </div>
     </div>

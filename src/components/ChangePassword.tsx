@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { Lock, Eye, EyeOff, AlertCircle, CheckCircle2, ShieldCheck, Info } from "lucide-react";
 import { changePassword } from "../services/auth";
+import { useRecaptcha } from "../hooks/useRecaptcha";
 
 export default function ChangePassword() {
+  const getRecaptchaToken = useRecaptcha();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -57,7 +59,8 @@ export default function ChangePassword() {
 
     setLoading(true);
     try {
-      await changePassword(currentPassword, newPassword);
+      const recaptchaToken = await getRecaptchaToken("change_password");
+      await changePassword(currentPassword, newPassword, recaptchaToken);
       setSuccess("Your password has been updated successfully.");
       setCurrentPassword("");
       setNewPassword("");

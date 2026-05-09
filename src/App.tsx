@@ -54,13 +54,6 @@ const Sidebar = () => {
     { path: "/admin/settings", label: "My Settings", icon: Settings },
   ];
 
-  const guestMenu = [
-    { path: "/guest", label: "Overview", icon: Eye },
-    { path: "/guest/customers", label: "Customers", icon: Users },
-    { path: "/guest/accounts", label: "Accounts", icon: Database },
-    { path: "/guest/transactions", label: "Transactions", icon: ArrowRightLeft },
-    { path: "/guest/audit-logs", label: "Audit Logs", icon: Shield },
-  ];
 
   const employeeMenu = [
     { path: "/", label: "Dashboard", icon: Home },
@@ -74,13 +67,13 @@ const Sidebar = () => {
     { path: "/settings", label: "Settings", icon: Settings },
   ];
 
-  const menuItems = isAdmin() ? adminMenu : isGuest() ? guestMenu : employeeMenu;
+  const menuItems = isAdmin() ? adminMenu : employeeMenu;
 
-  const roleLabel = isAdmin() ? "Administrator" : isGuest() ? "Guest" : "Employee";
-  const roleBadgeClass = isAdmin()
+  const roleLabel = isGuest() ? `Guest ${isAdmin() ? 'Admin' : 'Employee'}` : (isAdmin() ? "Administrator" : "Employee");
+  const roleBadgeClass = isGuest()
     ? "bg-amber-500/20 text-amber-300"
-    : isGuest()
-    ? "bg-slate-400/20 text-slate-300"
+    : isAdmin()
+    ? "bg-fuchsia-500/20 text-fuchsia-300"
     : "bg-indigo-500/20 text-indigo-300";
 
   const handleLogout = () => {
@@ -161,14 +154,27 @@ const Sidebar = () => {
 };
 
 // ─── Layout ───────────────────────────────────────────────────────────────────
-const Layout = () => (
-  <div className="flex h-screen overflow-hidden">
-    <Sidebar />
-    <div className="flex-1 overflow-auto ml-64">
-      <Outlet />
+const Layout = () => {
+  const { isGuest } = useAuth();
+  return (
+    <div className="flex h-screen overflow-hidden">
+      <Sidebar />
+      <div className="flex-1 overflow-auto ml-64 flex flex-col bg-slate-50">
+        {isGuest() && (
+          <div className="bg-amber-100 flex items-center justify-center p-2.5 shadow-sm border-b border-amber-200 z-40 sticky top-0">
+            <Shield size={16} className="text-amber-600 mr-2" />
+            <p className="text-sm font-semibold text-amber-900">
+              You're in Guest Mode — changes are temporary and strictly isolated. This session expires automatically.
+            </p>
+          </div>
+        )}
+        <div className="flex-1 relative">
+          <Outlet />
+        </div>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 // ─── Route Guards ─────────────────────────────────────────────────────────────
 const RequireAuth = ({ allowedRoles }: { allowedRoles: ("admin" | "employee" | "guest")[] }) => {

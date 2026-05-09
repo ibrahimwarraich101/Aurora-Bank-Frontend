@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff, Mail, Lock, AlertCircle, CheckCircle2, ArrowLeft, Shield } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, AlertCircle, CheckCircle2, ArrowLeft, Shield, Users, Briefcase } from "lucide-react";
 import { login, forgotPassword } from "../services/auth";
+import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
   const navigate = useNavigate();
   const { login: authLogin } = useAuth();
-  const [view, setView] = useState<"login" | "forgotPassword">("login");
+  const [view, setView] = useState<"login" | "forgotPassword" | "guestSelection">("login");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -50,6 +51,24 @@ export default function Login() {
       } else {
         setError("Invalid email or password");
       }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGuestLogin = async (role: 'admin' | 'employee') => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.post("/auth/guest", { role });
+      authLogin(response.data.token, response.data.user);
+      if (response.data.user.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
+    } catch (err) {
+      setError("Failed to initialize guest session. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -235,22 +254,86 @@ export default function Login() {
               </form>
 
               {/* Guest access hint */}
-              <div className="mt-6 p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Want to explore first?</p>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-slate-700 font-medium">Guest Access Available</p>
-                    <p className="text-xs text-slate-500 mt-0.5">Username: <code className="bg-white px-1.5 py-0.5 rounded border border-slate-200 font-mono text-slate-700">Guest</code> &nbsp; Password: <code className="bg-white px-1.5 py-0.5 rounded border border-slate-200 font-mono text-slate-700">Guest@1234</code></p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => { setEmail("Guest"); setPassword("Guest@1234"); }}
-                    className="text-xs font-bold text-indigo-600 hover:text-indigo-500 bg-indigo-50 hover:bg-indigo-100 px-3 py-2 rounded-xl transition-all whitespace-nowrap ml-3"
-                  >
-                    Auto-fill
-                  </button>
+              <div className="mt-6 p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-bold text-indigo-900">Want to explore safely?</p>
+                  <p className="text-xs text-indigo-700/70 mt-0.5">Try our isolated 2-hour guest sessions.</p>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => { setView("guestSelection"); setError(null); setSuccessMsg(null); }}
+                  className="text-xs font-bold text-white hover:bg-indigo-700 bg-indigo-600 px-4 py-2.5 rounded-xl transition-all whitespace-nowrap ml-3 shadow-md border border-indigo-500 hover:-translate-y-0.5 group flex items-center gap-2"
+                >
+                  <Shield size={14} className="text-indigo-200" />
+                  Guest Mode
+                </button>
               </div>
+            </div>
+          ) : view === "guestSelection" ? (
+             <div className="animate-in fade-in slide-in-from-right-4 duration-500">
+               <button 
+                 onClick={() => { setView("login"); setError(null); setSuccessMsg(null); }}
+                 className="flex items-center text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors mb-8 group disabled:opacity-50"
+                 disabled={loading}
+               >
+                 <ArrowLeft size={18} className="mr-2 group-hover:-translate-x-1 transition-transform" strokeWidth={2.5}/>
+                 Return to login
+               </button>
+               
+               <div className="mb-8">
+                 <h2 className="text-3xl font-bold text-gray-900 mb-3">Choose Your Role</h2>
+                 <p className="text-gray-500 font-medium leading-relaxed">
+                   Select a persona to explore. You'll get your very own isolated dummy database.
+                 </p>
+               </div>
+
+               {error && (
+                 <div className="mb-6 p-4 bg-red-50/50 border border-red-100/80 text-red-600 text-sm rounded-2xl flex items-start gap-3">
+                   <AlertCircle size={20} className="flex-shrink-0" />
+                   <span className="font-medium pt-0.5">{error}</span>
+                 </div>
+               )}
+
+               <div className="space-y-4">
+                 <button
+                   onClick={() => handleGuestLogin('admin')}
+                   disabled={loading}
+                   className="w-full relative group bg-white border-2 border-gray-100 hover:border-indigo-600 rounded-2xl p-5 text-left transition-all duration-300 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                 >
+                   <div className="flex items-start gap-4">
+                     <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                       <Shield size={24} />
+                     </div>
+                     <div>
+                       <h3 className="font-bold text-gray-900 text-lg mb-1">Explore as Admin</h3>
+                       <p className="text-sm text-gray-500">Full control over settings, complete visibility into operations, customers, and overall system logs.</p>
+                     </div>
+                   </div>
+                 </button>
+
+                 <button
+                   onClick={() => handleGuestLogin('employee')}
+                   disabled={loading}
+                   className="w-full relative group bg-white border-2 border-gray-100 hover:border-purple-600 rounded-2xl p-5 text-left transition-all duration-300 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                 >
+                   <div className="flex items-start gap-4">
+                     <div className="p-3 bg-purple-50 rounded-xl text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-colors">
+                       <Briefcase size={24} />
+                     </div>
+                     <div>
+                       <h3 className="font-bold text-gray-900 text-lg mb-1">Explore as Employee</h3>
+                       <p className="text-sm text-gray-500">Manage daily customer operations, create accounts, authorize transactions, and view personal metrics.</p>
+                     </div>
+                   </div>
+                 </button>
+               </div>
+               
+               {loading && (
+                  <div className="mt-6 flex flex-col items-center gap-3 text-indigo-600 animate-in fade-in">
+                    <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+                    <p className="text-sm font-semibold tracking-wide text-gray-600 animate-pulse">Provisioning your isolated environment...</p>
+                  </div>
+               )}
             </div>
           ) : (
             <div className="animate-in fade-in slide-in-from-right-4 duration-500">

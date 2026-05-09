@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import { 
   Sparkles, 
   User, 
@@ -21,6 +22,7 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isGuest } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const menuItems = [
@@ -114,8 +116,18 @@ const Layout = ({ children }: LayoutProps) => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
-        {children}
+      <main className="flex-1 overflow-y-auto flex flex-col">
+        {isGuest() && (
+          <div className="bg-amber-100 px-4 py-2 border-b border-amber-200">
+             <div className="max-w-4xl mx-auto flex items-center justify-center gap-2 text-amber-800 text-sm font-semibold">
+               <Shield size={16} className="text-amber-600" />
+               You're in Guest Mode — changes are temporary and strictly isolated. This session expires automatically.
+             </div>
+          </div>
+        )}
+        <div className="flex-1">
+           {children}
+        </div>
       </main>
     </div>
   );

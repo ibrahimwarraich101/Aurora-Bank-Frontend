@@ -5,6 +5,7 @@ interface User {
   name: string;
   email: string;
   role: "admin" | "employee" | "guest";
+  isGuest?: boolean;
 }
 
 interface AuthContextType {
@@ -62,7 +63,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const isAdmin = () => user?.role === "admin";
   const isEmployee = () => user?.role === "employee";
-  const isGuest = () => user?.role === "guest";
+  const isGuest = () => user?.isGuest === true;
   const isAuthenticated = () => !!token && !!user;
 
   return (

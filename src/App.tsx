@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, NavLink } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -61,10 +61,9 @@ const EMPLOYEE_MENU = [
 ];
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
-const Sidebar = () => {
+const Sidebar = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [open, setOpen] = useState(true);
   const { user, logout, isAdmin, isGuest } = useAuth();
 
   const menuItems = isAdmin() ? ADMIN_MENU : EMPLOYEE_MENU;
@@ -88,86 +87,125 @@ const Sidebar = () => {
     return location.pathname === path || location.pathname.startsWith(path + "/");
   };
 
+  const handleNavClick = (path: string) => {
+    navigate(path);
+    onClose(); // close drawer on mobile after navigation
+  };
+
   return (
-    <div className={`${open ? "w-64" : "w-20"} bg-gradient-to-b from-slate-900 via-indigo-950 to-slate-900 text-white transition-all duration-300 flex flex-col shadow-2xl h-screen fixed left-0 top-0 z-50 border-r border-white/5`}>
-      {/* Header */}
-      <div className="p-4 flex items-center justify-between border-b border-white/10">
-        {open && (
+    <>
+      {/* Mobile Overlay */}
+      {open && (
+        <div
+          className="fixed inset-0 bg-black/60 z-40 lg:hidden"
+          onClick={onClose}
+        />
+      )}
+
+      {/* Sidebar Drawer */}
+      <div className={`
+        fixed left-0 top-0 h-full z-50 w-64
+        bg-gradient-to-b from-slate-900 via-indigo-950 to-slate-900
+        text-white flex flex-col shadow-2xl border-r border-white/5
+        transition-transform duration-300
+        ${open ? "translate-x-0" : "-translate-x-full"}
+        lg:translate-x-0
+      `}>
+        {/* Header */}
+        <div className="p-4 flex items-center justify-between border-b border-white/10">
           <div className="flex items-center gap-2">
             <img src="/aurora.png" alt="Aurora Bank" className="w-8 h-8 object-contain" />
             <span className="font-bold text-sm tracking-wide">Aurora Bank</span>
           </div>
-        )}
-        <button onClick={() => setOpen(!open)} className="p-2 hover:bg-white/10 rounded-lg transition-all">
-          {open ? <X size={18} /> : <Menu size={18} />}
-        </button>
-      </div>
-
-      {/* Role Badge */}
-      {open && user && (
-        <div className="px-4 py-3 border-b border-white/10">
-          <p className="text-xs text-slate-400 mb-1">Signed in as</p>
-          <p className="text-sm font-semibold truncate">{user.name}</p>
-          <span className={`text-xs px-2 py-0.5 rounded-full font-medium mt-1 inline-block ${roleBadgeClass}`}>
-            {roleLabel}
-          </span>
+          <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg transition-all lg:hidden">
+            <X size={18} />
+          </button>
         </div>
-      )}
 
-      {/* Menu */}
-      <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
-        {menuItems.map((item) => {
-          const Icon = item.icon;
-          const active = isActive(item.path);
-          return (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm ${
-                active
-                  ? "bg-white/15 text-white font-semibold shadow-inner border border-white/10"
-                  : "hover:bg-white/8 text-slate-300 hover:text-white"
-              }`}
-            >
-              <Icon size={18} className={active ? "text-indigo-300" : "text-slate-400"} />
-              {open && <span>{item.label}</span>}
-            </NavLink>
-          );
-        })}
-      </nav>
-
-      {/* Footer */}
-      <div className="p-4 border-t border-white/10">
-        <button
-          onClick={handleLogout}
-          className={`w-full flex items-center gap-3 px-3 py-2.5 hover:bg-red-500/15 rounded-xl transition-all text-red-400 hover:text-red-300 text-sm ${!open && "justify-center"}`}
-        >
-          <LogOut size={18} />
-          {open && <span>Logout</span>}
-        </button>
-        {open && (
-          <p className="text-xs text-slate-600 mt-3 text-center">© Aurora Bank</p>
+        {/* Role Badge */}
+        {user && (
+          <div className="px-4 py-3 border-b border-white/10">
+            <p className="text-xs text-slate-400 mb-1">Signed in as</p>
+            <p className="text-sm font-semibold truncate">{user.name}</p>
+            <span className={`text-xs px-2 py-0.5 rounded-full font-medium mt-1 inline-block ${roleBadgeClass}`}>
+              {roleLabel}
+            </span>
+          </div>
         )}
+
+        {/* Menu */}
+        <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item.path);
+            return (
+              <button
+                key={item.path}
+                onClick={() => handleNavClick(item.path)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-left ${
+                  active
+                    ? "bg-white/15 text-white font-semibold shadow-inner border border-white/10"
+                    : "hover:bg-white/8 text-slate-300 hover:text-white"
+                }`}
+              >
+                <Icon size={18} className={active ? "text-indigo-300" : "text-slate-400"} />
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* Footer */}
+        <div className="p-4 border-t border-white/10">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-red-500/15 rounded-xl transition-all text-red-400 hover:text-red-300 text-sm"
+          >
+            <LogOut size={18} />
+            <span>Logout</span>
+          </button>
+          <p className="text-xs text-slate-600 mt-3 text-center">© Aurora Bank</p>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
 // ─── Layout ───────────────────────────────────────────────────────────────────
 const Layout = () => {
   const { isGuest } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <div className="flex h-screen overflow-hidden">
-      <Sidebar />
-      <div className="flex-1 overflow-auto ml-64 flex flex-col bg-slate-50">
+      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
+      {/* Main Content — shifted right on desktop */}
+      <div className="flex-1 overflow-auto lg:ml-64 flex flex-col bg-slate-50">
+        {/* Mobile Top Bar */}
+        <div className="lg:hidden flex items-center gap-3 px-4 py-3 bg-slate-900 border-b border-white/10 sticky top-0 z-30">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-2 rounded-lg text-white hover:bg-white/10 transition-all"
+          >
+            <Menu size={20} />
+          </button>
+          <div className="flex items-center gap-2">
+            <img src="/aurora.png" alt="Aurora Bank" className="w-6 h-6 object-contain" />
+            <span className="font-bold text-white text-sm">Aurora Bank</span>
+          </div>
+        </div>
+
+        {/* Guest Mode Banner */}
         {isGuest() && (
-          <div className="bg-amber-100 flex items-center justify-center p-2.5 shadow-sm border-b border-amber-200 z-40 sticky top-0">
-            <Shield size={16} className="text-amber-600 mr-2" />
-            <p className="text-sm font-semibold text-amber-900">
-              You're in Guest Mode — changes are temporary and strictly isolated. This session expires automatically.
+          <div className="bg-amber-100 flex items-center justify-center p-2.5 shadow-sm border-b border-amber-200 z-20 sticky top-0 lg:top-0">
+            <Shield size={16} className="text-amber-600 mr-2 flex-shrink-0" />
+            <p className="text-sm font-semibold text-amber-900 text-center">
+              Guest Mode — changes are temporary and isolated. Session expires automatically.
             </p>
           </div>
         )}
+
         <div className="flex-1 relative">
           <Outlet />
         </div>

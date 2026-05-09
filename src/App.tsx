@@ -1,6 +1,6 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, NavLink } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Home, User, CreditCard, ArrowRightLeft, Users, Database,
@@ -35,6 +35,31 @@ import GuestDashboard from "./pages/guest/GuestDashboard";
 
 import Login from "./pages/Login";
 
+// ─── Menu Definitions ────────────────────────────────────────────────────────
+const ADMIN_MENU = [
+  { path: "/admin", label: "Dashboard", icon: Home },
+  { path: "/admin/employees", label: "Employees", icon: UserCheck },
+  { path: "/admin/customers", label: "All Customers", icon: Users },
+  { path: "/admin/accounts", label: "All Accounts", icon: Database },
+  { path: "/admin/transactions", label: "All Transactions", icon: ArrowRightLeft },
+  { path: "/admin/reports", label: "Reports", icon: BarChart2 },
+  { path: "/admin/audit-logs", label: "Audit Logs", icon: Shield },
+  { path: "/admin/system-settings", label: "System Settings", icon: Building2 },
+  { path: "/admin/settings", label: "My Settings", icon: Settings },
+];
+
+const EMPLOYEE_MENU = [
+  { path: "/", label: "Dashboard", icon: Home },
+  { path: "/customer", label: "Customer Form", icon: User },
+  { path: "/account", label: "Account Form", icon: CreditCard },
+  { path: "/transaction", label: "Transaction Form", icon: ArrowRightLeft },
+  { path: "/view-customers", label: "View Customers", icon: Users },
+  { path: "/view-accounts", label: "View Accounts", icon: Database },
+  { path: "/view-transactions", label: "Transaction History", icon: FileText },
+  { path: "/audit-logs", label: "Audit Logs", icon: Shield },
+  { path: "/settings", label: "Settings", icon: Settings },
+];
+
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -42,32 +67,7 @@ const Sidebar = () => {
   const [open, setOpen] = useState(true);
   const { user, logout, isAdmin, isGuest } = useAuth();
 
-  const adminMenu = [
-    { path: "/admin", label: "Dashboard", icon: Home },
-    { path: "/admin/employees", label: "Employees", icon: UserCheck },
-    { path: "/admin/customers", label: "All Customers", icon: Users },
-    { path: "/admin/accounts", label: "All Accounts", icon: Database },
-    { path: "/admin/transactions", label: "All Transactions", icon: ArrowRightLeft },
-    { path: "/admin/reports", label: "Reports", icon: BarChart2 },
-    { path: "/admin/audit-logs", label: "Audit Logs", icon: Shield },
-    { path: "/admin/system-settings", label: "System Settings", icon: Building2 },
-    { path: "/admin/settings", label: "My Settings", icon: Settings },
-  ];
-
-
-  const employeeMenu = [
-    { path: "/", label: "Dashboard", icon: Home },
-    { path: "/customer", label: "Customer Form", icon: User },
-    { path: "/account", label: "Account Form", icon: CreditCard },
-    { path: "/transaction", label: "Transaction Form", icon: ArrowRightLeft },
-    { path: "/view-customers", label: "View Customers", icon: Users },
-    { path: "/view-accounts", label: "View Accounts", icon: Database },
-    { path: "/view-transactions", label: "Transaction History", icon: FileText },
-    { path: "/audit-logs", label: "Audit Logs", icon: Shield },
-    { path: "/settings", label: "Settings", icon: Settings },
-  ];
-
-  const menuItems = isAdmin() ? adminMenu : employeeMenu;
+  const menuItems = isAdmin() ? ADMIN_MENU : EMPLOYEE_MENU;
 
   const roleLabel = isGuest() ? `Guest ${isAdmin() ? 'Admin' : 'Employee'}` : (isAdmin() ? "Administrator" : "Employee");
   const roleBadgeClass = isGuest()
@@ -85,8 +85,6 @@ const Sidebar = () => {
     if (path === "/admin" || path === "/" || path === "/guest") {
       return location.pathname === path;
     }
-    // Check if the current pathname matches the path exactly or is a sub-path
-    // but ensure we don't match the parent /admin for sub-routes
     return location.pathname === path || location.pathname.startsWith(path + "/");
   };
 
@@ -122,10 +120,10 @@ const Sidebar = () => {
           const Icon = item.icon;
           const active = isActive(item.path);
           return (
-            <button
+            <NavLink
               key={item.path}
-              onClick={() => navigate(item.path)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-sm ${
+              to={item.path}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm ${
                 active
                   ? "bg-white/15 text-white font-semibold shadow-inner border border-white/10"
                   : "hover:bg-white/8 text-slate-300 hover:text-white"
@@ -133,7 +131,7 @@ const Sidebar = () => {
             >
               <Icon size={18} className={active ? "text-indigo-300" : "text-slate-400"} />
               {open && <span>{item.label}</span>}
-            </button>
+            </NavLink>
           );
         })}
       </nav>

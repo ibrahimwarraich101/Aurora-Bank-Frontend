@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { CreditCard, Trash2, AlertCircle, Search, RefreshCw, DollarSign } from "lucide-react";
-import axios from "axios";
+import api from "../services/api";
 
 interface Account {
   AccountNo: number;
@@ -21,7 +21,7 @@ const ViewAccounts: React.FC = () => {
   const fetchAccounts = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://localhost:5000/accounts");
+      const response = await api.get("/accounts");
       setAccounts(response.data);
       setError(null);
     } catch (err) {
@@ -43,7 +43,7 @@ const ViewAccounts: React.FC = () => {
 
     setDeleteLoading(accountNo);
     try {
-      await axios.delete(`http://localhost:5000/accounts/${accountNo}`);
+      await api.delete(`/accounts/${accountNo}`);
       setAccounts(accounts.filter(a => a.AccountNo !== accountNo));
       alert("Account deleted successfully!");
     } catch (err) {

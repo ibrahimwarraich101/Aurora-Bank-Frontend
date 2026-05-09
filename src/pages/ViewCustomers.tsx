@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Users, Trash2, AlertCircle, Search, RefreshCw } from "lucide-react";
-import axios from "axios";
+import api from "../services/api";
 
 interface Customer {
   CustomerID: number;
@@ -20,7 +20,7 @@ const ViewCustomers: React.FC = () => {
   const fetchCustomers = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://localhost:5000/customers");
+      const response = await api.get("/customers");
       setCustomers(response.data);
       setError(null);
     } catch (err) {
@@ -42,7 +42,7 @@ const ViewCustomers: React.FC = () => {
 
     setDeleteLoading(id);
     try {
-      await axios.delete(`http://localhost:5000/customers/${id}`);
+      await api.delete(`/customers/${id}`);
       setCustomers(customers.filter(c => c.CustomerID !== id));
       alert("Customer deleted successfully!");
     } catch (err) {

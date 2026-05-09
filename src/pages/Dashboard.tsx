@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Users, Wallet, TrendingUp, Activity } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../services/api";
 
 interface Transaction {
   TransID: number;
@@ -57,7 +57,7 @@ const Dashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/dashboard/stats");
+      const response = await api.get("/dashboard/stats");
       if (response.data.success) {
         setStats(response.data.data);
       }

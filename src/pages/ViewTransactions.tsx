@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ArrowRightLeft, ArrowDownCircle, ArrowUpCircle, RefreshCw, Calendar, Search } from "lucide-react";
-import axios from "axios";
+import api from "../services/api";
 
 interface Transaction {
   TransID: number;
@@ -20,7 +20,7 @@ const ViewTransactions: React.FC = () => {
   const fetchTransactions = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://localhost:5000/transactions");
+      const response = await api.get("/transactions");
       setTransactions(response.data);
     } catch (err) {
       console.error(err);

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Shield, RefreshCw, Calendar, Database } from "lucide-react";
-import axios from "axios";
+import api from "../services/api";
 
 interface AuditLog {
   LogID: number;
@@ -18,7 +18,7 @@ const AuditLogs: React.FC = () => {
   const fetchLogs = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://localhost:5000/audit-logs");
+      const response = await api.get("/audit-logs");
       setLogs(response.data);
     } catch (err) {
       console.error(err);

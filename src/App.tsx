@@ -85,7 +85,9 @@ const Sidebar = () => {
     if (path === "/admin" || path === "/" || path === "/guest") {
       return location.pathname === path;
     }
-    return location.pathname.startsWith(path);
+    // Check if the current pathname matches the path exactly or is a sub-path
+    // but ensure we don't match the parent /admin for sub-routes
+    return location.pathname === path || location.pathname.startsWith(path + "/");
   };
 
   return (
@@ -123,7 +125,7 @@ const Sidebar = () => {
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-sm ${
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-sm ${
                 active
                   ? "bg-white/15 text-white font-semibold shadow-inner border border-white/10"
                   : "hover:bg-white/8 text-slate-300 hover:text-white"

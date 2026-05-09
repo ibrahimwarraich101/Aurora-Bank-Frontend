@@ -47,14 +47,30 @@ const AdminDashboard = () => {
   }, []);
 
   const formatTime = (dt: string) => {
-    const diff = Date.now() - new Date(dt).getTime();
+    if (!dt) return { relative: "Unknown", absolute: "N/A" };
+    const date = new Date(dt);
+    if (isNaN(date.getTime())) return { relative: "Invalid", absolute: "Invalid Date" };
+    
+    const diff = Date.now() - date.getTime();
     const m = Math.floor(diff / 60000);
     const h = Math.floor(diff / 3600000);
     const d = Math.floor(diff / 86400000);
-    if (m < 1) return "Just now";
-    if (m < 60) return `${m}m ago`;
-    if (h < 24) return `${h}h ago`;
-    return `${d}d ago`;
+    
+    let relative = "";
+    if (m < 1) relative = "Just now";
+    else if (m < 60) relative = `${m}m ago`;
+    else if (h < 24) relative = `${h}h ago`;
+    else relative = `${d}d ago`;
+
+    return {
+      relative,
+      absolute: date.toLocaleString('en-US', { 
+        month: 'short', 
+        day: 'numeric', 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      })
+    };
   };
 
   if (loading) return (
@@ -103,18 +119,25 @@ const AdminDashboard = () => {
           </div>
         ) : (
           <div className="space-y-3">
-            {stats.recentActivity.map((a) => (
-              <div key={a.LogID} className="flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-indigo-100 flex items-center justify-center">
-                  <Activity className="text-indigo-600" size={16} />
+            {stats.recentActivity.map((a) => {
+              const time = formatTime(a.DateTime);
+              return (
+                <div key={a.LogID} className="flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors">
+                  <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-indigo-100 flex items-center justify-center">
+                    <Activity className="text-indigo-600" size={16} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-800 truncate">{a.details || a.action}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-xs text-gray-400">{a.performed_by_name || "System"}</p>
+                      <span className="text-[10px] text-gray-300">•</span>
+                      <p className="text-xs text-gray-400 font-medium">{time.absolute}</p>
+                    </div>
+                  </div>
+                  <span className="text-xs text-indigo-500 font-semibold flex-shrink-0">{time.relative}</span>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-800 truncate">{a.details || a.action}</p>
-                  <p className="text-xs text-gray-400">{a.performed_by_name || "System"}</p>
-                </div>
-                <span className="text-xs text-gray-400 flex-shrink-0">{formatTime(a.DateTime)}</span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

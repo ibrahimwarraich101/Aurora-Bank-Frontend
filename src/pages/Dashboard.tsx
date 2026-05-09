@@ -94,11 +94,25 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-800 mb-2">Dashboard</h1>
-        <p className="text-gray-600">Welcome back to Aurora Bank</p>
+<div className="min-h-screen bg-slate-50 p-6 lg:p-10">
+      {/* Compact Aesthetic Header */}
+      <div className="mb-8 relative rounded-2xl bg-gradient-to-tr from-indigo-900 via-purple-900 to-indigo-800 p-6 overflow-hidden shadow-lg border border-indigo-800/50">
+         <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500 rounded-full blur-[80px] opacity-20 pointer-events-none"></div>
+         <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500 rounded-full blur-[80px] opacity-20 pointer-events-none"></div>
+         
+         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-4 text-white">
+                <div className="flex-shrink-0 inline-flex items-center justify-center w-12 h-12 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 shadow-inner overflow-hidden">
+                  <img src="/aurora.png" alt="Aurora Bank" className="w-8 h-8 object-contain brightness-0 invert" />
+                </div>
+               <div>
+                 <h1 className="text-2xl font-bold tracking-tight drop-shadow-md">Command Center</h1>
+                 <p className="text-indigo-100/80 text-sm mt-0.5">
+                    Welcome back to Aurora Bank. Monitor enterprise assets and user portfolios in real-time.
+                 </p>
+               </div>
+            </div>
+         </div>
       </div>
 
       {/* Stats Grid */}
@@ -117,7 +131,7 @@ const Dashboard = () => {
         />
         <StatCard
           title="Total Balance"
-          value={`${stats.totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+          value={`Rs. ${stats.totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
           icon={TrendingUp}
           color="from-purple-500 to-purple-600"
         />
@@ -172,7 +186,7 @@ const Dashboard = () => {
                     </td>
                     <td className="py-4 px-4 text-gray-700">{txn.FromAccount || "-"}</td>
                     <td className="py-4 px-4 text-gray-700">{txn.ToAccount || "-"}</td>
-                    <td className="py-4 px-4 text-gray-800 font-semibold">${txn.Amount.toLocaleString()}</td>
+                    <td className="py-4 px-4 text-gray-800 font-semibold">Rs. {txn.Amount.toLocaleString()}</td>
                     <td className="py-4 px-4 text-gray-500 text-sm">{formatTime(txn.DateTime)}</td>
                   </tr>
                 ))}

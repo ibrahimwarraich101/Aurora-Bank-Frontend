@@ -2,6 +2,35 @@ import axios from "axios";
 
 const API_URL = "http://localhost:5000";
 
+const getAuthHeaders = () => {
+  const token = localStorage.getItem("token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
+const api = axios.create({ baseURL: API_URL });
+
+// Auto-attach auth token to every request
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
+// Auto-redirect on 401/403
+api.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    if (err.response?.status === 401 || err.response?.status === 403) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      window.location.href = "/login";
+    }
+    return Promise.reject(err);
+  }
+);
+
+export { getAuthHeaders };
+
 export interface Customer {
   Name: string;
   CNIC: string;
@@ -21,76 +50,48 @@ export interface Transaction {
   Type: "Deposit" | "Withdrawal" | "Transfer";
 }
 
-export interface AuditLog {
-  LogID: number;
-  Operation: string;
-  TableAffected: string;
-  RecordID: number | null;
-  User: string;
-  Details: string;
-  UserAction: string;
-  Status: string;
-  DateTime: string;
-}
-
 // ================== CUSTOMER APIs ==================
-
 export const fetchCustomers = async () => {
-  try {
-    const response = await axios.get(`${API_URL}/customers`);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching customers:", error);
-    throw error;
-  }
+  const res = await api.get("/customers");
+  return res.data;
 };
 
 export const addCustomer = async (customer: Customer) => {
-  try {
-    const response = await axios.post(`${API_URL}/customers`, customer);
-    return response.data;
-  } catch (error) {
-    console.error("Error adding customer:", error);
-    throw error;
-  }
+  const res = await api.post("/customers", customer);
+  return res.data;
+};
+
+export const deleteCustomerApi = async (id: number) => {
+  const res = await api.delete(`/customers/${id}`);
+  return res.data;
 };
 
 // ================== ACCOUNT APIs ==================
-
 export const fetchAccounts = async () => {
-  try {
-    const response = await axios.get(`${API_URL}/accounts`);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching accounts:", error);
-    throw error;
-  }
+  const res = await api.get("/accounts");
+  return res.data;
+};
+
+export const fetchAccountsByCustomer = async (customerId: string) => {
+  const res = await api.get(`/accounts/by-customer/${customerId}`);
+  return res.data;
 };
 
 export const addAccount = async (account: Account) => {
-  try {
-    const response = await axios.post(`${API_URL}/accounts`, account);
-    return response.data;
-  } catch (error) {
-    console.error("Error creating account:", error);
-    throw error;
-  }
+  const res = await api.post("/accounts", account);
+  return res.data;
+};
+
+export const deleteAccountApi = async (id: number) => {
+  const res = await api.delete(`/accounts/${id}`);
+  return res.data;
 };
 
 // ================== TRANSACTION APIs ==================
-
-/**
- * Deposit money into an account
- * @param AccountNo - Account number to deposit into
- * @param Amount - Amount to deposit
- */
 export const deposit = async (AccountNo: string, Amount: number) => {
   try {
-    const response = await axios.post(`${API_URL}/accounts/deposit`, {
-      AccountNo,
-      Amount
-    });
-    return response.data;
+    const res = await api.post("/accounts/deposit", { AccountNo, Amount });
+    return res.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       throw new Error(error.response.data.error || "Deposit failed");
@@ -99,18 +100,10 @@ export const deposit = async (AccountNo: string, Amount: number) => {
   }
 };
 
-/**
- * Withdraw money from an account
- * @param AccountNo - Account number to withdraw from
- * @param Amount - Amount to withdraw
- */
 export const withdraw = async (AccountNo: string, Amount: number) => {
   try {
-    const response = await axios.post(`${API_URL}/accounts/withdraw`, {
-      AccountNo,
-      Amount
-    });
-    return response.data;
+    const res = await api.post("/accounts/withdraw", { AccountNo, Amount });
+    return res.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       throw new Error(error.response.data.error || "Withdrawal failed");
@@ -119,14 +112,10 @@ export const withdraw = async (AccountNo: string, Amount: number) => {
   }
 };
 
-/**
- * Transfer money between two accounts
- * @param transaction - Transaction details with FromAccount, ToAccount, Amount
- */
 export const transfer = async (transaction: Transaction) => {
   try {
-    const response = await axios.post(`${API_URL}/transactions/transfer`, transaction);
-    return response.data;
+    const res = await api.post("/transactions/transfer", transaction);
+    return res.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       throw new Error(error.response.data.error || "Transfer failed");
@@ -136,33 +125,56 @@ export const transfer = async (transaction: Transaction) => {
 };
 
 export const fetchTransactions = async () => {
-  try {
-    const response = await axios.get(`${API_URL}/transactions`);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching transactions:", error);
-    throw error;
-  }
+  const res = await api.get("/transactions");
+  return res.data;
 };
 
 // ================== AUDIT LOG APIs ==================
-
 export const fetchAuditLogs = async () => {
-  try {
-    const response = await axios.get(`${API_URL}/auditlogs`);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching audit logs:", error);
-    throw error;
-  }
+  const res = await api.get("/audit-logs");
+  return res.data;
 };
 
-export const fetchAuditLogsByTable = async (tableName: string) => {
-  try {
-    const response = await axios.get(`${API_URL}/auditlogs/table/${tableName}`);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching audit logs by table:", error);
-    throw error;
-  }
+// ================== EMPLOYEE APIs (Admin only) ==================
+export const fetchEmployees = async () => {
+  const res = await api.get("/employees");
+  return res.data;
 };
+
+export const createEmployee = async (data: { name: string; username: string; email: string; password: string; phone?: string }) => {
+  const res = await api.post("/employees", data);
+  return res.data;
+};
+
+export const updateEmployee = async (id: number, data: { name?: string; email?: string; phone?: string }) => {
+  const res = await api.put(`/employees/${id}`, data);
+  return res.data;
+};
+
+export const toggleEmployeeActive = async (id: number) => {
+  const res = await api.patch(`/employees/${id}/toggle`);
+  return res.data;
+};
+
+export const deleteEmployee = async (id: number) => {
+  const res = await api.delete(`/employees/${id}`);
+  return res.data;
+};
+
+// ================== ADMIN APIs ==================
+export const fetchAdminReports = async () => {
+  const res = await api.get("/admin/reports");
+  return res.data;
+};
+
+export const fetchSystemSettings = async () => {
+  const res = await api.get("/admin/system-settings");
+  return res.data;
+};
+
+export const updateSystemSettings = async (settings: Record<string, string>) => {
+  const res = await api.put("/admin/system-settings", settings);
+  return res.data;
+};
+
+export default api;

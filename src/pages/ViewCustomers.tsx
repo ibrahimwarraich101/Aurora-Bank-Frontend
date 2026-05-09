@@ -75,28 +75,34 @@ const ViewCustomers: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
-              <div className="bg-gradient-to-br from-blue-500 to-indigo-600 p-4 rounded-2xl shadow-lg">
-                <Users className="w-8 h-8 text-white" />
+<div className="min-h-screen bg-slate-50 p-6 lg:p-10">
+      <div className="max-w-7xl mx-auto flex flex-col">
+        {/* Compact Aesthetic Header */}
+        <div className="mb-10 relative rounded-2xl bg-gradient-to-tr from-emerald-900 via-teal-900 to-cyan-900 p-6 overflow-hidden shadow-lg border border-teal-800/50">
+           <div className="absolute top-0 right-0 w-64 h-64 bg-teal-500 rounded-full blur-[80px] opacity-20 pointer-events-none"></div>
+           <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500 rounded-full blur-[80px] opacity-20 pointer-events-none"></div>
+           
+           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex items-center gap-4 text-white">
+                 <div className="flex-shrink-0 inline-flex items-center justify-center w-12 h-12 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 shadow-inner">
+                   <Users className="w-6 h-6 text-emerald-200" />
+                 </div>
+                 <div>
+                   <h1 className="text-2xl font-bold tracking-tight drop-shadow-md">Client Directory</h1>
+                   <p className="text-emerald-100/80 text-sm mt-0.5">
+                      View, manage, and process all registered customer profiles.
+                   </p>
+                 </div>
               </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-800">All Customers</h1>
-                <p className="text-gray-600">View all registered customers in the system</p>
-              </div>
-            </div>
-            <button
-              onClick={fetchCustomers}
-              className="flex items-center gap-2 px-4 py-2 bg-white rounded-xl shadow-md hover:shadow-lg transition-all"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Refresh
-            </button>
-          </div>
+              <button
+                onClick={fetchCustomers}
+                className="flex items-center justify-center gap-2 px-4 py-2 text-sm bg-white/10 backdrop-blur-md rounded-lg hover:bg-white/20 transition-all text-white font-medium border border-white/10 shadow-sm"
+               >
+                 <RefreshCw className="w-4 h-4" />
+                 Sync Database
+               </button>
+           </div>
+        </div>
 
           {/* Search Bar */}
           <div className="relative">
@@ -109,8 +115,6 @@ const ViewCustomers: React.FC = () => {
               className="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none shadow-md"
             />
           </div>
-        </div>
-
         {/* Error Message */}
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">

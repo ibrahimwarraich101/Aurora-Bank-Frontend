@@ -87,28 +87,34 @@ const ViewTransactions: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <div className="bg-gradient-to-br from-purple-500 to-pink-600 p-4 rounded-2xl shadow-lg">
-                <ArrowRightLeft className="w-8 h-8 text-white" />
+<div className="min-h-screen bg-slate-50 p-6 lg:p-10">
+      <div className="max-w-7xl mx-auto flex flex-col">
+        {/* Compact Aesthetic Header */}
+        <div className="mb-8 relative rounded-2xl bg-gradient-to-tr from-purple-900 via-pink-900 to-orange-900 p-6 overflow-hidden shadow-lg border border-pink-800/50">
+           <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500 rounded-full blur-[80px] opacity-20 pointer-events-none"></div>
+           <div className="absolute bottom-0 left-0 w-64 h-64 bg-pink-500 rounded-full blur-[80px] opacity-20 pointer-events-none"></div>
+           
+           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex items-center gap-4 text-white">
+                  <div className="flex-shrink-0 inline-flex items-center justify-center w-12 h-12 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 shadow-inner overflow-hidden">
+                    <img src="/aurora.png" alt="Aurora Bank" className="w-8 h-8 object-contain brightness-0 invert" />
+                  </div>
+                 <div>
+                   <h1 className="text-2xl font-bold tracking-tight drop-shadow-md">Global Ledger</h1>
+                   <p className="text-pink-100/80 text-sm mt-0.5">
+                      Monitor and trace every single transaction flowing through the network.
+                   </p>
+                 </div>
               </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-800">Transaction History</h1>
-                <p className="text-gray-600">View all banking transactions</p>
-              </div>
-            </div>
-            <button
-              onClick={fetchTransactions}
-              className="flex items-center gap-2 px-4 py-2 bg-white rounded-xl shadow-md hover:shadow-lg transition-all"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Refresh
-            </button>
-          </div>
+              <button
+                onClick={fetchTransactions}
+                className="flex items-center justify-center gap-2 px-4 py-2 text-sm bg-white/10 backdrop-blur-md rounded-lg hover:bg-white/20 transition-all text-white font-medium border border-white/10 shadow-sm"
+               >
+                 <RefreshCw className="w-4 h-4" />
+                 Refresh Ledger
+               </button>
+           </div>
+        </div>
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -178,8 +184,6 @@ const ViewTransactions: React.FC = () => {
               </button>
             ))}
           </div>
-        </div>
-
         {/* Transactions Table */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           <div className="overflow-x-auto">
@@ -230,7 +234,7 @@ const ViewTransactions: React.FC = () => {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <span className="font-bold text-green-600">
-                          ${Number(transaction.Amount).toFixed(2)}
+                          Rs. {Number(transaction.Amount).toFixed(2)}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-gray-600 text-sm">
@@ -259,13 +263,13 @@ const ViewTransactions: React.FC = () => {
             <div>
               <p className="text-gray-600 text-sm mb-1">Total Volume</p>
               <p className="text-2xl font-bold text-green-600">
-                ${totalAmount.toFixed(2)}
+                Rs. {totalAmount.toFixed(2)}
               </p>
             </div>
             <div>
               <p className="text-gray-600 text-sm mb-1">Average Transaction</p>
               <p className="text-2xl font-bold text-blue-600">
-                ${filteredTransactions.length ? (totalAmount / filteredTransactions.length).toFixed(2) : "0.00"}
+                Rs. {filteredTransactions.length ? (totalAmount / filteredTransactions.length).toFixed(2) : "0.00"}
               </p>
             </div>
           </div>

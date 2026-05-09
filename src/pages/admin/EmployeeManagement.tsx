@@ -74,14 +74,20 @@ const EmployeeManagement = () => {
     }
 
     try {
+      let res;
       if (modal.type === "create") {
-        await createEmployee({ 
+        res = await createEmployee({ 
           name: form.name, 
           username: form.username,
           email: form.email, 
           password: form.password, 
           phone: form.phone 
         });
+        
+        // Show success popup as requested
+        if (res.data.success) {
+          alert(res.data.message || `Success! Welcome email sent to ${form.email}`);
+        }
       } else if (modal.type === "edit" && modal.employee) {
         await updateEmployee(modal.employee.id, { name: form.name, email: form.email, phone: form.phone });
       }

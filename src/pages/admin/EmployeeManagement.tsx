@@ -284,7 +284,7 @@ const EmployeeManagement = () => {
                     
                     setForm(p => ({ ...p, phone: formatted }));
                   }}
-                  onFocus={e => {
+                  onFocus={() => {
                     if (!form.phone) setForm(p => ({ ...p, phone: "+92 " }));
                   }}
                   placeholder="+92 300 1234567"
